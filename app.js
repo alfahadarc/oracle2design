@@ -1,6 +1,7 @@
 const express = require("express");
 const database = require("./services/database");
 require("dotenv").config();
+const baseRoute = require("./routes/baseRoute");
 
 const app = express();
 
@@ -18,6 +19,7 @@ async function startDB() {
 }
 
 startDB();
+app.use("/api", baseRoute);
 
 app.listen(3001, () => {
   console.log("listening 3001");
