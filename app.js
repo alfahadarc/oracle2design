@@ -1,9 +1,12 @@
 const express = require("express");
+const cors = require("cors");
 const database = require("./services/database");
 require("dotenv").config();
 const baseRoute = require("./routes/baseRoute");
 
 const app = express();
+
+app.use(cors());
 
 app.use(express.json());
 async function startDB() {
