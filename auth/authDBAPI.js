@@ -7,7 +7,6 @@ module.exports = {
 const loginQuery = `
 select *
 from GENERAL_USER`;
-// where USER_NAME='admin' and PASSWORD = 'Admin@123' and HAS_ACCOUNT = 1;`
 
 async function login(credentials) {
   let query = loginQuery;

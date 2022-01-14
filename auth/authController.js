@@ -1,5 +1,5 @@
 require("dotenv").config();
-const secret = process.env.secret;
+const secret = process.env.SECRET;
 
 const jwt = require("jsonwebtoken");
 const authDBApi = require("./authDBAPI");
@@ -12,11 +12,13 @@ module.exports = {
 
 function authenticate(req, res, next) {
   authenticateUser(req.body)
-    .then((user) =>
-      user
-        ? res.json(user)
-        : res.status(400).json({ message: "Username or password is incorrect" })
-    )
+    .then((user) => {
+      if (user != null) {
+        res.json(user);
+      } else {
+        res.status(400).json({ message: "Username or password is incorrect" });
+      }
+    })
     .catch((err) => next(err));
 }
 
@@ -25,30 +27,31 @@ async function authenticateUser({ username, password }) {
     let credentials = {};
     credentials.username = username;
     credentials.password = password;
-    const rows = await authDBApi.login(credentials);
-    console.log("authController");
-    console.log(rows);
-    if (rows) {
+    const rows = await authDBApi.login(credentials); // [] or admin
+
+    //admin
+    if (rows.length > 0) {
+      const user = rows[0];
       const token = jwt.sign(
         {
-          sub: rows.USER_NAME,
-          role: rows.USER_ROLE,
+          username: user.USER_NAME,
+          role: user.USER_ROLE,
         },
-        secret
+        secret,
+        { expiresIn: "2 days" }
       );
 
-      return {
-        rows,
-        token,
-      };
+      user.token = token;
+      return user;
+    } else {
+      return null;
     }
   } finally {
-    next();
   }
 }
 
-function all() {
-  console.log("all");
+function all(req, res, next) {
+  res.status(200).send("Welcome 🙌 ");
 }
 
 function public() {

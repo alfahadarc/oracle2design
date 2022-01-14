@@ -1,6 +1,6 @@
+require("dotenv").config();
 const oracledb = require("oracledb");
 const dbConfig = require("../config/databaseConfig");
-require("dotenv").config();
 
 async function initialize() {
   await oracledb.createPool(dbConfig.hrPool);

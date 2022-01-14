@@ -1,25 +1,22 @@
 require("dotenv").config();
-const jwt = require("express-jwt");
+const jwt = require("jsonwebtoken");
 
 const secret = process.env.SECRET;
 
-function authorize(roles = []) {
-  if (typeof roles === "string") {
-    roles = [roles];
+const verifyToken = (req, res, next) => {
+  const token =
+    req.body.token || req.query.token || req.headers["x-access-token"];
+
+  if (!token) {
+    return res.status(403).send("A token is required for authentication");
   }
+  try {
+    const decoded = jwt.verify(token, secret);
+    req.user = decoded;
+  } catch (err) {
+    return res.status(401).send("Invalid Token");
+  }
+  return next();
+};
 
-  return [
-    jwt({ secret, algorithms: ["HS256"] }),
-
-    (req, res, next) => {
-      if (roles.length && !roles.includes(req.user.role)) {
-        return res.status(401).json({
-          message: "Unauthorized",
-        });
-      }
-      next();
-    },
-  ];
-}
-
-module.exports = { authorize };
+module.exports = { verifyToken };
