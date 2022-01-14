@@ -1,9 +1,17 @@
 const express = require("express");
-const database = require("./services/database");
+const cors = require("cors");
 require("dotenv").config();
+
+const bodyParser = require("body-parser");
+const errorHandler = require("./middleware/error-handler");
+const database = require("./services/database");
 const baseRoute = require("./routes/baseRoute");
 
 const app = express();
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(cors());
 
 app.use(express.json());
 async function startDB() {
@@ -19,8 +27,11 @@ async function startDB() {
 }
 
 startDB();
+
 app.use("/api", baseRoute);
 
+// global error handler
+app.use(errorHandler);
 app.listen(3001, () => {
   console.log("listening 3001");
 });
