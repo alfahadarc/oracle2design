@@ -7,6 +7,7 @@ const authRoute = require("../auth/authRoute");
 
 // router.use("/country", countryRoute);
 
+//need a homepage route for all unauth user
 router.use("/auth", authRoute);
 
 module.exports = router;

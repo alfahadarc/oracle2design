@@ -4,6 +4,13 @@ const { authorize, verifyToken } = require("../middleware/authJWT");
 const Role = require("../middleware/role");
 const authController = require("./authController");
 
+router.get("/onlyme", authorize([Role.Admin]), (req, res) => {
+  res.json({
+    pedro: 100,
+    paulo: 10,
+    colin: 012,
+  });
+});
 router.post("/login", authController.authenticate); //login
 router.get("/all", verifyToken, authController.all); //testing
 //router.get("/:id", authorize(), authController.public); //all login
