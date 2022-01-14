@@ -1,8 +1,7 @@
+require("dotenv").config();
 const jwt = require("express-jwt");
 
 const secret = process.env.SECRET;
-
-module.export = authorize;
 
 function authorize(roles = []) {
   if (typeof roles === "string") {
@@ -22,3 +21,5 @@ function authorize(roles = []) {
     },
   ];
 }
+
+module.exports = { authorize };
