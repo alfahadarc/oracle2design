@@ -1,7 +1,13 @@
 const adminDashboardDBAPI= require('./adminDashboardDBAPI');
 const expressValidator=require('express-validator');
+
+function whoIsIt(req){
+    console.log("name: "+req.username+", role: "+req.role);
+}
 async function getAllProducts(req,res,next){
     try{
+        // console.log("all products requested by: ");
+        // whoIsIt(req);
         var allProducts=await adminDashboardDBAPI.getAllProductsFromDB();
         res.status(200).json(allProducts);
     }catch(err){

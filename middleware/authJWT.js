@@ -3,6 +3,8 @@ const jwt = require("jsonwebtoken");
 
 const secret = process.env.SECRET;
 
+
+//this won't be used. will use authorize() instead;
 const verifyToken = (req, res, next) => {
   const token =
     req.body.token || req.query.token || req.headers["x-access-token"];
@@ -30,6 +32,8 @@ const authorize = (permissions) => {
     try {
       const decoded = jwt.verify(token, secret);
       const userRole = decoded.role;
+      req.username=decoded.username;
+      req.role=decoded.role;
 
       if (permissions.includes(userRole)) {
         next();
