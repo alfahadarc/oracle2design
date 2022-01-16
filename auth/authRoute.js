@@ -12,6 +12,7 @@ router.get("/onlyme", authorize([Role.Admin]), (req, res) => {
   });
 });
 router.post("/login", authController.authenticate); //login
+router.put("/logout", verifyToken, authController.logout);
 router.get("/all", verifyToken, authController.all); //testing
 //router.get("/:id", authorize(), authController.public); //all login
 
