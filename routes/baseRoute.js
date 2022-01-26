@@ -3,6 +3,7 @@ const router = express.Router();
 
 const authRoute = require("../auth/authRoute");
 const admindashboardRoute=require('../adminDashboard/adminDashboardRoute');
+const clientRoute= require('../client/clientRoute');
 const { authorize } = require("../middleware/authJWT");
 const role = require("../middleware/role");
 // const countryRoute = require("./countryRoute");
@@ -12,5 +13,6 @@ const role = require("../middleware/role");
 //need a homepage route for all unauth user
 router.use("/auth", authRoute);
 router.use("/admindashboard",authorize([role.Admin]),admindashboardRoute);
+router.use('/client',require('../client/clientRoute'));
 
 module.exports = router;
