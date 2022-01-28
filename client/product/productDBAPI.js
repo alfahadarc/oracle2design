@@ -17,5 +17,14 @@ async function getProductFromDB(productID){
     return result.rows[0];
 }
 
+async function productExists(productID){
+    var binds={};
+    var sql=`SELECT ITEM_ID FROM PRODUCT WHERE ITEM_ID=:productID`;
+    binds.productID=productID;
+    var result= await database.simpleExecute(sql,binds);
+    return result.rows.length>0;
+}
 
-module.exports={getProductFromDB};
+
+
+module.exports={getProductFromDB,productExists};

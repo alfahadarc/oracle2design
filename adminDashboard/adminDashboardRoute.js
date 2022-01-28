@@ -17,3 +17,9 @@ router.get('/allManufacturers',manufacturerController.getAllManufacturers);
 router.post('/addManufacturer',manufacturerController.addManufacturer);
 router.post('/addCategory',categoryController.addCategory);
 router.post('/addProduct',productController.addProduct);
+router.post('/addProductMainImage',productController.uploadMainImageMulter.single('productMainImage'),
+(req,res,next)=>{
+    res.send('ok');
+});
+
+router.get('/productMainImage',productController.getProductMainImage);

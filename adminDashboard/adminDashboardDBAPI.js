@@ -1,5 +1,4 @@
 
-const res = require('express/lib/response');
 const database=require('../services/database');
 
 async function getAllProductsFromDB(){

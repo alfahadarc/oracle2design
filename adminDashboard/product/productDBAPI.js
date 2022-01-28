@@ -48,4 +48,12 @@ async function addProduct(title,price,summary,isFeatured,isContinued,updatedByUs
         return result;
 }
 
-module.exports={addProduct,getAllProductsFromDB,getProductFromDB};
+async function productExists(productID){
+    var binds={};
+    var sql=`SELECT ITEM_ID FROM PRODUCT WHERE ITEM_ID=:productID`;
+    binds.productID=productID;
+    var result= await database.simpleExecute(sql,binds);
+    return result.rows.length>0;
+}
+
+module.exports={addProduct,getAllProductsFromDB,getProductFromDB,productExists};

@@ -1,7 +1,34 @@
 
 const productDBAPI=require('./productDBAPI');
 const queryUndefinedHandler=require('../../middleware/queryUndefinedHandler');
-
+const fs=require('fs');
+const path=require('path');
+require('dotenv').config();
+const multer=require('multer');
+const storage=multer.diskStorage(
+  {
+    filename:function(req,file,cb){
+      var productID=req.body.productID;
+      var fileName=productID+'.png';
+      cb(null,fileName);
+    },
+    destination:function(req,file,cb){
+      cb(null,process.env.PRODUCT_MAIN_IMAGE_PATH);
+      console.log(req.body);
+    }
+  }
+);
+const uploadMainImageMulter=multer({storage,
+fileFilter:async (req,file,cb)=>{
+  var productID=req.body.productID;
+  var productExists= await productDBAPI.productExists(productID);
+  if(!productExists){
+    cb('product does not exist!',false);
+  }
+  else
+    cb(null,true);
+}   
+});
 
 
 async function getAllProducts(req, res, next) {
@@ -45,4 +72,21 @@ async function addProduct(req,res,next){
     }
 }
 
-module.exports={addProduct,getAllProducts,getProduct};
+async function getProductMainImage(req,res,next){
+  var productID=req.query.productID;
+  var productExists=await productDBAPI.productExists(productID);
+  if(productExists){
+    var imageName=productID+'.png';
+    var filePath=path.join(__dirname,'../../',process.env.PRODUCT_MAIN_IMAGE_PATH,imageName);
+    console.log(filePath);
+    if(fs.existsSync(filePath)){
+      res.status(200).sendFile(filePath);
+    }
+    else
+      res.status(404).send('product Image not found');
+  }
+  else
+    res.status(404).send('product not found');
+}
+
+module.exports={addProduct,getAllProducts,getProduct,uploadMainImageMulter,getProductMainImage};
