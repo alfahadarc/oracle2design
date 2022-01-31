@@ -8,6 +8,7 @@ module.exports = {
   authenticate,
   all,
   public,
+  logout,
 };
 
 function authenticate(req, res, next) {
@@ -48,6 +49,21 @@ async function authenticateUser({ username, password }) {
     }
   } finally {
   }
+}
+
+function logout(req, res, next) {
+  const authHeader = req.headers["x-access-token"];
+
+  token = "";
+  jwt.sign({ a: "a" }, secret, { expiresIn: 1 }, (err, logouttoken) => {
+    if (err) {
+      console.log(err);
+    } else {
+      req.headers["x-access-token"] = logouttoken;
+      res.status(200).json({ message: "You are logout" });
+    }
+    res.status(400).json({ message: "request denied" });
+  });
 }
 
 function all(req, res, next) {

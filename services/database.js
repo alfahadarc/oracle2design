@@ -19,6 +19,7 @@ async function simpleExecute(statement, binds = [], opts = {}) {
   let result = [];
 
   opts.outFormat = oracledb.OBJECT;
+  opts.autoCommit=true;
 
   try {
     conn = await oracledb.getConnection();
