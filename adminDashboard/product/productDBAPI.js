@@ -48,7 +48,7 @@ async function addProduct(title,price,summary,isFeatured,isContinued,updatedByUs
         return result;
 }
 
-async function productExists(productID){
+async function productIDExists(productID){
     var binds={};
     var sql=`SELECT ITEM_ID FROM PRODUCT WHERE ITEM_ID=:productID`;
     binds.productID=productID;
@@ -56,4 +56,11 @@ async function productExists(productID){
     return result.rows.length>0;
 }
 
-module.exports={addProduct,getAllProductsFromDB,getProductFromDB,productExists};
+async function productTitleExists(title){
+    var binds={title};
+    var sql=`SELECT * FROM ITEM WHERE TITLE = :title`;
+    var result= await database.simpleExecute(sql,binds);
+    return result.rows.length>0;
+}
+
+module.exports={addProduct,getAllProductsFromDB,getProductFromDB,productIDExists,productTitleExists};

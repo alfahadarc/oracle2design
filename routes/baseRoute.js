@@ -32,9 +32,5 @@ router.use("/admindashboard",authorize([role.Admin]),admindashboardRoute);
 router.use('/client',require('../client/clientRoute'));
 
 
-router.get('/test',upload.single('video'),(req,res,next)=>{
-    res.download(path.join(__dirname,'../videos/myVideo.mp4'));
-})
-
 
 module.exports = router;

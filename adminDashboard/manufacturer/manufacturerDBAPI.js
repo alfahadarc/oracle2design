@@ -18,4 +18,22 @@ async function addManufacturer(manufacturerName,description,motto){
     return result;
 }
 
-module.exports={getAllManufacturersFromDB,addManufacturer};
+async function manufacturerNameExists(manufacturerName){
+    var binds={manufacturerName};
+    var query='select * from MANUFACTURER where MANUFACTURER_NAME = :manufacturerName';
+    var result=await database.simpleExecute(query,binds);
+    if(result.rows.length>0)
+        return true;
+    return false;
+}
+
+async function manufacturerIDExists(manufacturerID){
+    var binds={manufacturerID};
+    var query='select * from MANUFACTURER where MANUFACTURER_ID = :manufacturerID';
+    var result=await database.simpleExecute(query,binds);
+    if(result.rows.length>0)
+        return true;
+    return false;
+}
+
+module.exports={getAllManufacturersFromDB,addManufacturer,manufacturerNameExists,manufacturerIDExists};

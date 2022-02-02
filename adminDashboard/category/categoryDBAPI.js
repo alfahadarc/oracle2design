@@ -1,3 +1,4 @@
+
 const database=require('../../services/database');
 
 async function getAllCategoriesFromDB(){
@@ -16,5 +17,23 @@ async function addCategory(categoryName,description){
     return result;
 }
 
+async function categoryNameExists(categoryName){
+    var binds={categoryName};
+    var query='select * from CATEGORY where CATEGORY_NAME = :categoryName';
+    var result= await database.simpleExecute(query,binds);
+    if(result.rows.length>0)
+        return true;
+    return false;   
+}
 
-module.exports={getAllCategoriesFromDB,addCategory};
+async function categoryIDExists(categoryID){
+    var binds={categoryID};
+    var query='select * from CATEGORY where CATEGORY_ID = :categoryID';
+    var result= await database.simpleExecute(query,binds);
+    if(result.rows.length>0)
+        return true;
+    return false;   
+}
+
+
+module.exports={getAllCategoriesFromDB,addCategory,categoryNameExists,categoryIDExists};
