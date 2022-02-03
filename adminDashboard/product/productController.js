@@ -8,11 +8,10 @@ const fs=require('fs');
 const path=require('path');
 require('dotenv').config();
 const multer=require('multer');
-const { isNumberObject } = require('util/types');
 const storage=multer.diskStorage(
   {
     filename:function(req,file,cb){
-      var productID=parseInt(req.body.productID);
+      var productID=req.query.productID;
       var fileName=productID+'.png';
       cb(null,fileName);
     },
@@ -25,26 +24,11 @@ const uploadMainImageMulter=multer({storage,
 fileFilter:async (req,file,cb)=>{
     try{
       var filePattern=/png/;
-      if(!filePattern.test(file.mimetype) || !file.originalname.endsWith('.png')){
+      if(!filePattern.test(file.mimetype) || !(file.originalname.endsWith('.png')|| file.originalname.endsWith('.PNG'))){
         cb(message.error('Only PNG images are allowed'),false);
         return;
       }
-      var productID=queryUndefinedHandler.returnNullIfUndefined(req.body.productID);
-      if(productID===null){
-        cb(message.error('No product ID is given'),false);
-        return;
-      }
-      if((typeof(productID)==='string')===true){
-        productID=parseInt(productID);
-        if(isNaN(productID)==true){
-          cb(message.error('Invalid Product ID given'),false);
-          return;
-        }
-      }
-      else if((typeof(productID)==='number')==false){
-        cb(message.error('Invalid Product ID given'),false);
-        return;
-      }
+      var productID=req.query.productID;
       var productExists= await productDBAPI.productIDExists(productID);
       if(!productExists){
         cb(message.error('Product does not exist'),false);

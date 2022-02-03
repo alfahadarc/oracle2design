@@ -5,7 +5,6 @@ const queryUndefinedHandler=require('../../middleware/queryUndefinedHandler');
 const path=require('path');
 const fs=require('fs');
 const multer=require('multer');
-const { isNumber } = require('util');
 
 async function getAllManufacturers(req, res, next) {
     try {
@@ -100,7 +99,7 @@ async function getManufacturerImage(req,res,next){
 const storage=multer.diskStorage(
   {
     filename:function(req,file,cb){
-      var manufacturerID=req.body.manufacturerID;
+      var manufacturerID=req.query.manufacturerID;
       var fileName=manufacturerID+'.png';
       cb(null,fileName);
     },
@@ -113,26 +112,11 @@ const uploadImageMulter=multer({storage,
 fileFilter:async (req,file,cb)=>{
     try{
       var filePattern=/png/;
-      if(!filePattern.test(file.mimetype) || !file.originalname.endsWith('.png')){
+      if(!filePattern.test(file.mimetype) || !(file.originalname.endsWith('.png')|| file.originalname.endsWith('.PNG'))){
         cb(message.error('Only PNG images are allowed'),false);
         return;
       }
-      var manufacturerID=queryUndefinedHandler.returnNullIfUndefined(req.body.manufacturerID);
-      if(manufacturerID===null){
-        cb(message.error('No Manufacturer  is given'),false);
-        return;
-      }
-      if(typeof(manufacturerID)==='string'){
-        manufacturerID=parseInt(manufacturerID);
-        if(isNaN(manufacturerID)){
-          cb(message.error('Invalid Manufacturer'),false);
-          return;
-        }
-      }
-      else if((typeof(manufacturerID)==='number')===false){
-        cb(message.error('No Manufacturer ID is given'),false);
-        return;
-      }
+      var manufacturerID=req.query.manufacturerID;
       var manufactureExists= await manufacturerDBAPI.manufacturerIDExists(manufacturerID);
       if(!manufactureExists){
         cb(message.error('Manufacturer does not exist'),false);

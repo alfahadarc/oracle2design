@@ -77,6 +77,8 @@ validationHandler(validationResult,'No Valid Category or Manufacturer Given')
 
 
 router.post('/addProductMainImage',
+query('productID').exists().isInt(),
+validationHandler(validationResult,'Invalid Product ID'),
 productController.uploadMainImageMulter.single('productMainImage'),
 (req,res,next)=>{
     res.status(200).json(message.success('Image Uploaded'));
@@ -105,7 +107,10 @@ query('manufacturerID').exists().isInt(),
 validationHandler(validationResult,'There must be a valid manufacturer given'),
 manufacturerController.getManufacturerImage);
 
-router.post('/addManufacturerImage',manufacturerController.uploadImageMulter.single('manufacturerImage'),
+router.post('/addManufacturerImage',
+query('manufacturerID').exists().isInt(),
+validationHandler(validationResult,'Need a valid Manufacturer ID')
+,manufacturerController.uploadImageMulter.single('manufacturerImage'),
 (req,res)=>{
   res.status(200).json(message.success('Manufacturer Image Uploaded'))
 }
