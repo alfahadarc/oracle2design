@@ -12,5 +12,11 @@ async function getCategoryProductsFromDB(categoryID){
     return result.rows;
 }
 
+async function getAllCategoriesFromDB(){
+    var sql=`SELECT * FROM CATEGORY ORDER BY CATEGORY_NAME ASC`;
+    var result=await database.simpleExecute(sql);
+    return result.rows;
+}
 
-module.exports={getCategoryProductsFromDB};
+
+module.exports={getCategoryProductsFromDB,getAllCategoriesFromDB};
