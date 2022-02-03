@@ -1,7 +1,3 @@
 
-
-
-var database=require('./services/database');
-var itemID=41;
-var title='Plaaaaaaaaaa';
-database.simpleExecute(`UPDATE ITEM SET TITLE= :title WHERE ITEM_ID= :itemID`,{itemID,title});
+res.status(500).json(message.internalServerError());
+res.status(400).json(message.error(''));
