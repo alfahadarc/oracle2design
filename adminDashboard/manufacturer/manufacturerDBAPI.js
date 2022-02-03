@@ -45,7 +45,7 @@ async function updateManufacturer(manufacturerID,manufacturerName,description,mo
         var query=`UPDATE MANUFACTURER
         SET DESCRIPTION= :description, MOTTO= :motto
         WHERE MANUFACTURER_ID= :manufacturerID`;
-        var binds={manufacturerID,description,motto};
+        var binds={description,motto,manufacturerID};
         await database.simpleExecute(query,binds);
     }
     else{
@@ -54,7 +54,7 @@ async function updateManufacturer(manufacturerID,manufacturerName,description,mo
         var query=`UPDATE MANUFACTURER
         SET MANUFACTURER_NAME= :manufacturerName,DESCRIPTION= :description, MOTTO= :motto
         WHERE MANUFACTURER_ID= :manufacturerID`;
-        var binds={manufacturerName,manufacturerID,description,motto};
+        var binds={manufacturerName,description,motto,manufacturerID};
         await database.simpleExecute(query,binds);
     }
 }

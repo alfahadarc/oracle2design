@@ -46,13 +46,13 @@ async function getCategoryFromDB(categoryID){
 }
 
 async function updateCategory(categoryID,categoryName,description){
-    var binds={categoryID,categoryName,description};
     var category= await getCategoryFromDB(categoryID);
     if(category==null){
         throw 'category does not exist';
     }
     if(category.CATEGORY_NAME===categoryName){
         var sql=`UPDATE CATEGORY SET DESCRIPTION= :description where CATEGORY_ID= :categoryID`;
+        var binds={description,categoryID};
         await database.simpleExecute(sql,binds);
     }
     else{
@@ -60,6 +60,7 @@ async function updateCategory(categoryID,categoryName,description){
             throw 'category name already taken';
         }
         var sql=`UPDATE CATEGORY SET DESCRIPTION= :description,CATEGORY_NAME= :categoryName where CATEGORY_ID = :categoryID`;
+        var binds={description,categoryName,categoryID};
         await database.simpleExecute(sql,binds);
     }
 }
