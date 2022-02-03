@@ -1,4 +1,5 @@
 
+const { query } = require('express');
 const database=require('../../services/database');
 
 async function getAllCategoriesFromDB(){
@@ -35,5 +36,33 @@ async function categoryIDExists(categoryID){
     return false;   
 }
 
+async function getCategoryFromDB(categoryID){
+    var binds={categoryID};
+    var sql=`SELECT * FROM CATEGORY WHERE CATEGORY_ID= :categoryID`;
+    var result=await database.simpleExecute(sql,binds);
+    if(result.rows.length>0)
+        return result.rows[0];
+    return null;
+}
 
-module.exports={getAllCategoriesFromDB,addCategory,categoryNameExists,categoryIDExists};
+async function updateCategory(categoryID,categoryName,description){
+    var binds={categoryID,categoryName,description};
+    var category= await getCategoryFromDB(categoryID);
+    if(category==null){
+        throw 'category does not exist';
+    }
+    if(category.CATEGORY_NAME===categoryName){
+        var sql=`UPDATE CATEGORY SET DESCRIPTION= :description where CATEGORY_ID= :categoryID`;
+        await database.simpleExecute(sql,binds);
+    }
+    else{
+        if(await categoryNameExists(categoryName)){
+            throw 'category name already taken';
+        }
+        var sql=`UPDATE CATEGORY SET DESCRIPTION= :description,CATEGORY_NAME= :categoryName where CATEGORY_ID = :categoryID`;
+        await database.simpleExecute(sql,binds);
+    }
+}
+
+
+module.exports={getAllCategoriesFromDB,addCategory,categoryNameExists,categoryIDExists,getCategoryFromDB,updateCategory};

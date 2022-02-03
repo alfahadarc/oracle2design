@@ -1,5 +1,7 @@
 
 const productDBAPI=require('./productDBAPI');
+const manufacturerDBAPI=require('../manufacturer/manufacturerDBAPI');
+const categoryDBAPI=require('../category/categoryDBAPI');
 const queryUndefinedHandler=require('../../middleware/queryUndefinedHandler');
 const message=require('../../middleware/message');
 const fs=require('fs');
@@ -10,7 +12,7 @@ const { isNumberObject } = require('util/types');
 const storage=multer.diskStorage(
   {
     filename:function(req,file,cb){
-      var productID=req.body.productID;
+      var productID=parseInt(req.body.productID);
       var fileName=productID+'.png';
       cb(null,fileName);
     },
@@ -25,18 +27,32 @@ fileFilter:async (req,file,cb)=>{
       var filePattern=/png/;
       if(!filePattern.test(file.mimetype) || !file.originalname.endsWith('.png')){
         cb(message.error('Only PNG images are allowed'),false);
+        return;
       }
       var productID=queryUndefinedHandler.returnNullIfUndefined(req.body.productID);
-      if(productID===null || isNumberObject(productID))
+      if(productID===null){
         cb(message.error('No product ID is given'),false);
+        return;
+      }
+      if((typeof(productID)==='string')===true){
+        productID=parseInt(productID);
+        if(isNaN(productID)==true){
+          cb(message.error('Invalid Product ID given'),false);
+          return;
+        }
+      }
+      else if((typeof(productID)==='number')==false){
+        cb(message.error('Invalid Product ID given'),false);
+        return;
+      }
       var productExists= await productDBAPI.productIDExists(productID);
       if(!productExists){
         cb(message.error('Product does not exist'),false);
+        return;
       }
       else
         cb(null,true);
     }catch(err){
-      console.log(err.stack)  ;
         cb(message.internalServerError());
     }
   }   
@@ -54,7 +70,7 @@ async function getAllProducts(req, res, next) {
   
   async function getProduct(req, res, next) {
     try {
-      var product = await productDBAPI.getProductFromDB(req.query.id);
+      var product = await productDBAPI.getProductFromDB(req.query.productID);
       if(product===null){
         res.status(400).json(message.error('Product does not exist'));
         return;
@@ -112,8 +128,41 @@ async function getProductMainImage(req,res,next){
     else
       res.status(400).json(message.error('Product does not exist'));
   }catch(err){
+    res.status(500).json(message.internalServerError(),false);
+  }
+}
+
+async function updateProduct(req,res,next){
+  try{
+    var {itemID,category,manufacturer,price,title,stock,isFeatured,isContinued}=req.body;
+    var summary=queryUndefinedHandler.returnNullIfUndefined(req.body.summary);
+    var discount=queryUndefinedHandler.returnNullIfUndefined(req.body.discount);
+    var discountExpireDate=queryUndefinedHandler.returnNullIfUndefined(req.body.discountExpireDate);
+    var username=req.username;
+
+    var product=await productDBAPI.getProductFromDB(itemID);
+    if(product==null){
+      res.status(400).json(message.error('Product does not exist'));
+      return;
+    }
+    if((product.TITLE===title)==false){
+      if(await productDBAPI.productTitleExists(title)){
+        res.status(400).json(message.error('Title is Taken'));
+        return;
+      }
+    }
+    if((await manufacturerDBAPI.manufacturerIDExists(manufacturer)==false)||(await categoryDBAPI.categoryIDExists(category)==false)){
+      res.status(400).json(message.error('Manufacturer or Category does not exist'));
+      return;
+    }
+    await productDBAPI.updateProduct(itemID,title,price,summary,isFeatured,isContinued,username,stock,discount,discountExpireDate,
+    category,manufacturer);
+    res.status(200).json(message.success('Product Updated'));
+  }catch(err){
+    console.log(err.stack);
     res.status(500).json(message.internalServerError());
   }
 }
 
-module.exports={addProduct,getAllProducts,getProduct,uploadMainImageMulter,getProductMainImage};
+
+module.exports={addProduct,getAllProducts,getProduct,uploadMainImageMulter,getProductMainImage,updateProduct};

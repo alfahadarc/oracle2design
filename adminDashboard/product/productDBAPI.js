@@ -15,7 +15,7 @@ async function getProductFromDB(product_id){
     const binds={};
     binds.item_id=product_id;
     
-    var query=`SELECT I.ITEM_ID,I.TITLE,PRICE,SUMMARY,IS_FEATURED,IS_CONTINUED,P.STOCK,DISCOUNT,
+    var query=`SELECT I.ITEM_ID,I.TITLE,I.UPDATE_DATE,I.UPDATED_BY,PRICE,SUMMARY,IS_FEATURED,IS_CONTINUED,P.STOCK,DISCOUNT,
     DISCOUNT_EXPIRE_DATE,MANUFACTURER_ID,CATEGORY_ID,MANUFACTURER_NAME,CATEGORY_NAME
     FROM ITEM I JOIN PRODUCT P on I.ITEM_ID = P.ITEM_ID
     JOIN MANUFACTURER M on P.MANUFACTURER = M.MANUFACTURER_ID
@@ -49,9 +49,8 @@ async function addProduct(title,price,summary,isFeatured,isContinued,updatedByUs
 }
 
 async function productIDExists(productID){
-    var binds={};
+    var binds={productID};
     var sql=`SELECT ITEM_ID FROM PRODUCT WHERE ITEM_ID=:productID`;
-    binds.productID=productID;
     var result= await database.simpleExecute(sql,binds);
     return result.rows.length>0;
 }
@@ -63,4 +62,17 @@ async function productTitleExists(title){
     return result.rows.length>0;
 }
 
-module.exports={addProduct,getAllProductsFromDB,getProductFromDB,productIDExists,productTitleExists};
+async function updateProduct(itemID,title,price,summary,isFeatured,isContinued,updatedByUserName,stock,discount,
+    discountExpireDate,category,manufacturer){
+    var updateDate= Date.now(); 
+    var binds={title,price,summary,isFeatured,isContinued,updatedByUserName,updateDate,itemID};
+    var sql=`UPDATE ITEM SET TITLE= :title, PRICE= :price, SUMMARY= :summary, IS_FEATURED= :isFeatured,
+    IS_CONTINUED= :isContinued,UPDATED_BY= :updatedByUserName, UPDATE_DATE= :updateDate WHERE ITEM_ID= :itemID`;
+    await database.simpleExecute(sql,binds);
+    binds={stock,discount,discountExpireDate,category,manufacturer,itemID};
+    sql=`UPDATE PRODUCT SET STOCK= :stock, DISCOUNT= :discount,DISCOUNT_EXPIRE_DATE= :discountExpireDate,CATEGORY= :category,
+    MANUFACTURER= :manufacturer WHERE ITEM_ID= :itemID`;
+    await database.simpleExecute(sql,binds);
+}
+
+module.exports={addProduct,getAllProductsFromDB,getProductFromDB,productIDExists,productTitleExists,updateProduct};
