@@ -1,8 +1,11 @@
 require("dotenv").config();
+const message=require('../middleware/message');
 const secret = process.env.SECRET;
 
 const jwt = require("jsonwebtoken");
 const authDBApi = require("./authDBAPI");
+
+
 
 module.exports = {
   authenticate,
@@ -17,10 +20,10 @@ function authenticate(req, res, next) {
       if (user != null) {
         res.json(user);
       } else {
-        res.status(400).json({ message: "Username or password is incorrect" });
+        res.status(400).json(message.error('Username or Password is Incorrect'));
       }
     })
-    .catch((err) => next(err));
+    .catch((err) => res.status(500).json(message.internalServerError()));
 }
 
 async function authenticateUser({ username, password }) {

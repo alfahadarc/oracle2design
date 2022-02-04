@@ -4,23 +4,16 @@ module.exports = {
   login,
 };
 
-const loginQuery = `
-select *
-from GENERAL_USER`;
 
 async function login(credentials) {
-  let query = loginQuery;
+  let query='';
   const binds = {};
+  binds.username = credentials.username;
+  binds.password = credentials.password;
 
-  if (credentials.username && credentials.password) {
-    binds.username = credentials.username;
-    binds.password = credentials.password;
-
-    query += `\nwhere USER_NAME = :username
-        and PASSWORD= :password
-        and HAS_ACCOUNT= 1`;
-  }
-
+  query = `SELECT * FROM GENERAL_USER where USER_NAME = :username
+      and PASSWORD= :password
+      and HAS_ACCOUNT= 1`;
   const result = await database.simpleExecute(query, binds);
   return result.rows;
 }

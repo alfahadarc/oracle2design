@@ -1,6 +1,9 @@
 
 const productDBAPI=require('./productDBAPI');
+const manufacturerDBAPI=require('../manufacturer/manufacturerDBAPI');
+const categoryDBAPI=require('../category/categoryDBAPI');
 const queryUndefinedHandler=require('../../middleware/queryUndefinedHandler');
+const message=require('../../middleware/message');
 const fs=require('fs');
 const path=require('path');
 require('dotenv').config();
@@ -8,52 +11,67 @@ const multer=require('multer');
 const storage=multer.diskStorage(
   {
     filename:function(req,file,cb){
-      var productID=req.body.productID;
+      var productID=req.query.productID;
       var fileName=productID+'.png';
       cb(null,fileName);
     },
     destination:function(req,file,cb){
       cb(null,process.env.PRODUCT_MAIN_IMAGE_PATH);
-      console.log(req.body);
     }
   }
 );
 const uploadMainImageMulter=multer({storage,
 fileFilter:async (req,file,cb)=>{
-  var productID=req.body.productID;
-  var productExists= await productDBAPI.productExists(productID);
-  if(!productExists){
-    cb('product does not exist!',false);
-  }
-  else
-    cb(null,true);
-}   
+    try{
+      var filePattern=/png/;
+      if(!filePattern.test(file.mimetype) || !(file.originalname.endsWith('.png')|| file.originalname.endsWith('.PNG'))){
+        cb(message.error('Only PNG images are allowed'),false);
+        return;
+      }
+      var productID=req.query.productID;
+      var productExists= await productDBAPI.productIDExists(productID);
+      if(!productExists){
+        cb(message.error('Product does not exist'),false);
+        return;
+      }
+      else
+        cb(null,true);
+    }catch(err){
+        cb(message.internalServerError());
+    }
+  }   
 });
 
 
 async function getAllProducts(req, res, next) {
     try {
-      // console.log("all products requested by: ");
-      // whoIsIt(req);
       var allProducts = await productDBAPI.getAllProductsFromDB();
       res.status(200).json(allProducts);
     } catch (err) {
-      res.status(400).json(err);
+      res.status(500).json(message.internalServerError());
     }
   }
   
   async function getProduct(req, res, next) {
     try {
-      var product = await productDBAPI.getProductFromDB(req.query.id);
+      var product = await productDBAPI.getProductFromDB(req.query.productID);
+      if(product===null){
+        res.status(400).json(message.error('Product does not exist'));
+        return;
+      }
       res.status(200).json(product);
     } catch (err) {
-      res.status(400).json(err);
+      res.status(500).json(message.internalServerError());
     }
   }
 
 async function addProduct(req,res,next){
     try{
-        var title=queryUndefinedHandler.returnNullIfUndefined(req.body.title);
+        var title=req.body.title;
+        if(await productDBAPI.productTitleExists(title)){
+          res.status(400).json(message.error('Product Title Already Exists'));
+          return;
+        }
         var price=queryUndefinedHandler.returnNullIfUndefined(req.body.price);
         var summary=queryUndefinedHandler.returnNullIfUndefined(req.body.summary);
         var isFeatured=queryUndefinedHandler.returnNullIfUndefined(req.body.isFeatured);
@@ -63,30 +81,72 @@ async function addProduct(req,res,next){
         var discountExpireDate=queryUndefinedHandler.returnNullIfUndefined(req.body.discountExpireDate);
         var category=queryUndefinedHandler.returnNullIfUndefined(req.body.category);
         var manufacturer=queryUndefinedHandler.returnNullIfUndefined(req.body.manufacturer);
+        if(!await require('../manufacturer/manufacturerDBAPI').manufacturerIDExists(manufacturer)
+        || !await require('../category/categoryDBAPI').categoryIDExists(category)){
+          res.status(400).json(message.error('Category or Manufacturer Does not Exist'));
+          return;
+        }
         var updatedByUserName=req.username;
         var result= productDBAPI.addProduct(title,price,summary,isFeatured,isContinued,updatedByUserName
             ,stock,discount,discountExpireDate,category,manufacturer);
-        res.status(200).json(true);
+        res.status(200).json(message.success('Product Added'));
     }catch(err){
-        res.json(err);
+        res.status(400).json(message.internalServerError());
     }
 }
 
 async function getProductMainImage(req,res,next){
-  var productID=req.query.productID;
-  var productExists=await productDBAPI.productExists(productID);
-  if(productExists){
-    var imageName=productID+'.png';
-    var filePath=path.join(__dirname,'../../',process.env.PRODUCT_MAIN_IMAGE_PATH,imageName);
-    console.log(filePath);
-    if(fs.existsSync(filePath)){
-      res.status(200).sendFile(filePath);
+  try{
+    var productID=req.query.productID;
+    if(await productDBAPI.productIDExists(productID)){
+      var imageName=productID+'.png';
+      var filePath=path.join(__dirname,'../../',process.env.PRODUCT_MAIN_IMAGE_PATH,imageName);
+      if(fs.existsSync(filePath)){
+        res.status(200).sendFile(filePath);
+      }
+      else{
+        filePath=path.join(__dirname,'../../',process.env.PRODUCT_MAIN_IMAGE_PATH,'default.png');
+        res.status(200).sendFile(filePath);
+      }
     }
     else
-      res.status(404).send('product Image not found');
+      res.status(400).json(message.error('Product does not exist'));
+  }catch(err){
+    res.status(500).json(message.internalServerError(),false);
   }
-  else
-    res.status(404).send('product not found');
 }
 
-module.exports={addProduct,getAllProducts,getProduct,uploadMainImageMulter,getProductMainImage};
+async function updateProduct(req,res,next){
+  try{
+    var {itemID,category,manufacturer,price,title,stock,isFeatured,isContinued}=req.body;
+    var summary=queryUndefinedHandler.returnNullIfUndefined(req.body.summary);
+    var discount=queryUndefinedHandler.returnNullIfUndefined(req.body.discount);
+    var discountExpireDate=queryUndefinedHandler.returnNullIfUndefined(req.body.discountExpireDate);
+    var username=req.username;
+
+    var product=await productDBAPI.getProductFromDB(itemID);
+    if(product==null){
+      res.status(400).json(message.error('Product does not exist'));
+      return;
+    }
+    if((product.TITLE===title)==false){
+      if(await productDBAPI.productTitleExists(title)){
+        res.status(400).json(message.error('Title is Taken'));
+        return;
+      }
+    }
+    if((await manufacturerDBAPI.manufacturerIDExists(manufacturer)==false)||(await categoryDBAPI.categoryIDExists(category)==false)){
+      res.status(400).json(message.error('Manufacturer or Category does not exist'));
+      return;
+    }
+    await productDBAPI.updateProduct(itemID,title,price,summary,isFeatured,isContinued,username,stock,discount,discountExpireDate,
+    category,manufacturer);
+    res.status(200).json(message.success('Product Updated'));
+  }catch(err){
+    console.log(err.stack);
+    res.status(500).json(message.internalServerError());
+  }
+}
+
+
+module.exports={addProduct,getAllProducts,getProduct,uploadMainImageMulter,getProductMainImage,updateProduct};
