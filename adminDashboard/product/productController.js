@@ -2,6 +2,7 @@
 const productDBAPI=require('./productDBAPI');
 const manufacturerDBAPI=require('../manufacturer/manufacturerDBAPI');
 const categoryDBAPI=require('../category/categoryDBAPI');
+const componentDBAPI=require('../component/componentDBAPI');
 const queryUndefinedHandler=require('../../middleware/queryUndefinedHandler');
 const message=require('../../middleware/message');
 const fs=require('fs');
@@ -87,8 +88,27 @@ async function addProduct(req,res,next){
           return;
         }
         var updatedByUserName=req.username;
-        var result= productDBAPI.addProduct(title,price,summary,isFeatured,isContinued,updatedByUserName
+        var itemID=await productDBAPI.addProduct(title,price,summary,isFeatured,isContinued,updatedByUserName
             ,stock,discount,discountExpireDate,category,manufacturer);
+        var numericComponents=req.body.numericComponents;
+        var nonnumericComponents=req.body.nonnumericComponents;
+        console.log(numericComponents);
+        for( let i=0;i<numericComponents.length;i++){
+            var numComp=numericComponents[i];
+            if(await componentDBAPI.numericComponentExists(numComp.title)==false){
+                console.log(numComp +'does not exist');
+                continue;
+            }
+            console.log('adding numComp '+numComp);
+            await componentDBAPI.addNumericComponentToProduct(itemID,numComp.title,numComp.value);
+        }
+        for(let i=0;i<nonnumericComponents.length;i++){
+            var nonNumComp=nonnumericComponents[i];
+            if(await componentDBAPI.descriptiveComponentExists(nonNumComp.title)==false){
+              continue;
+            }
+            await componentDBAPI.addDescriptiveComponentToProduct(itemID,nonNumComp.title,nonNumComp.specification);
+        }
         res.status(200).json(message.success('Product Added'));
     }catch(err){
         res.status(400).json(message.internalServerError());

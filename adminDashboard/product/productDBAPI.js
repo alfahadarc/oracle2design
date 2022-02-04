@@ -45,7 +45,7 @@ async function addProduct(title,price,summary,isFeatured,isContinued,updatedByUs
         VALUES(:itemID,:stock,:discount,:discountExpireDate,:category,:manufacturer)`;
         binds={itemID,stock,discount,discountExpireDate,category,manufacturer};
         var result=await database.simpleExecute(addProductSql,binds);
-        return result;
+        return itemID;
 }
 
 async function productIDExists(productID){
