@@ -8,7 +8,7 @@ const categoryController=require('./category/categoryController');
 const { check,validationResult,query,body,checkSchema} = require("express-validator");
 const validationHandler=require('../middleware/validationHandler');
 const message=require('../middleware/message');
-const { route } = require("express/lib/application");
+const componentController=require('./component/componentController');
 
 const router = express.Router();
 
@@ -161,3 +161,7 @@ body('category','manufacturer').exists().isInt(),
 validationHandler(validationResult,'No Valid Category or Manufacturer Given'),
 productController.updateProduct
 );
+
+
+router.get('/allNumericComponents',componentController.getAllNumericComponents);
+router.get('/allDescriptiveComponents',componentController.getDescriptiveComponents);
