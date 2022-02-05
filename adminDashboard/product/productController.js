@@ -109,6 +109,7 @@ async function addProduct(req,res,next){
         }
         res.status(200).json(message.success('Product Added'));
     }catch(err){
+        console.log(err.stack);
         res.status(400).json(message.internalServerError());
     }
 }

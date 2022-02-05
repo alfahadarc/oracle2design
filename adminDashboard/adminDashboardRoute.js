@@ -28,18 +28,18 @@ router.get('/allManufacturers',manufacturerController.getAllManufacturers);
 router.post('/addManufacturer',
 body('manufacturerName').exists().isLength({min:1,max:100}),
 validationHandler(validationResult,'There must be a Valid Manufacturer Name'),
-body('description').optional().isLength({max:500}),
-validationHandler(validationResult,'Manufacturer description is too long'),
-body('motto').optional().isLength({max:100}),
-validationHandler(validationResult,'Motto is too long'),
+body('description').optional({nullable:true}).isLength({max:500}),
+validationHandler(validationResult,'Manufacturer description is invalid'),
+body('motto').optional({nullable:true}).isLength({max:100}),
+validationHandler(validationResult,'Motto is invalid'),
 manufacturerController.addManufacturer);
 
 
 router.post('/addCategory',
 body('categoryName').exists().isLength({min:1,max:100}),
 validationHandler(validationResult,'There must be a Valid Category Name'),
-body('description').optional().isLength({max:500}),
-validationHandler(validationResult, 'Category Description is too long'),
+body('description').optional({nullable:true}).isLength({max:500}),
+validationHandler(validationResult, 'Category Description is invalid'),
 categoryController.addCategory);
 
 
@@ -57,20 +57,23 @@ body('stock').exists().isInt().custom(value=>{
     return Promise.reject();
   return true;
 }),validationHandler(validationResult,'Invalid stock'),
-body('summary').optional().isLength({max:1000}),
-validationHandler(validationResult,'Summary is too long'),
+body('summary').optional({nullable:true}).isLength({max:1000}),
+validationHandler(validationResult,'Summary is invalid'),
 body('isFeatured','isContinued').exists().isNumeric().custom(value=>{
   if(value==1 || value==0)
     return true;
   return Promise.reject();
 }),validationHandler(validationResult,'Featured or Continued Flag is Invalid'),
-body('discount').optional().isNumeric().custom(value=>{
+body('discount').optional({nullable:true}).isInt().custom(value=>{
+
   if(value>100 || value<0)
     return Promise.reject();
   return true;
 }),validationHandler(validationResult,'Invalid discount'),
-body('discountExpireDate').optional().isInt(),
+body('discountExpireDate').optional({nullable:true}).isInt(),
 validationHandler(validationResult,'Invalid Discount Expire Date'),
+body('discount').if(body('discountExpireDate').exists()).isInt(),
+validationHandler(validationResult,'Cannot add discount expire date without discount'),
 body('category','manufacturer').exists().isInt(),
 validationHandler(validationResult,'No Valid Category or Manufacturer Given')
 ,productController.addProduct);
@@ -95,10 +98,10 @@ body('manufacturerID').exists().isInt(),
 validationHandler(validationResult,'Need a Valid Manufacturer ID'),
 body('manufacturerName').exists().isLength({min:1,max:100}),
 validationHandler(validationResult,'There must be a Valid Manufacturer Name'),
-body('description').optional().isLength({max:500}),
-validationHandler(validationResult,'Manufacturer description is too long'),
-body('motto').optional().isLength({max:100}),
-validationHandler(validationResult,'Motto is too long'),
+body('description').optional({nullable:true}).isLength({max:500}),
+validationHandler(validationResult,'Manufacturer description is invalid'),
+body('motto').optional({nullable:true}).isLength({max:100}),
+validationHandler(validationResult,'Motto is invalid'),
 manufacturerController.updateManufacturer
 );
 
@@ -119,7 +122,7 @@ validationHandler(validationResult,'Need a valid Manufacturer ID')
 router.put('/updateCategory',
 body('categoryName').exists().isLength({min:1,max:100}),
 validationHandler(validationResult,'There must be a Valid Category Name'),
-body('description').optional().isLength({max:500}),
+body('description').optional({nullable:true}).isLength({max:500}),
 validationHandler(validationResult, 'Category Description is too long'),
 body('categoryID').exists().isInt(),
 validationHandler(validationResult,'Invalid Category ID'),
@@ -143,20 +146,23 @@ body('stock').exists().isInt().custom(value=>{
     return Promise.reject();
   return true;
 }),validationHandler(validationResult,'Invalid stock'),
-body('summary').optional().isLength({max:1000}),
-validationHandler(validationResult,'Summary is too long'),
+body('summary').optional({nullable:true}).isLength({max:1000}),
+validationHandler(validationResult,'Summary is invalid'),
 body('isFeatured','isContinued').exists().isNumeric().custom(value=>{
   if(value==1 || value==0)
     return true;
   return Promise.reject();
 }),validationHandler(validationResult,'Featured or Continued Flag is Invalid'),
-body('discount').optional().isNumeric().custom(value=>{
+body('discount').optional({nullable:true}).isInt().custom(value=>{
+
   if(value>100 || value<0)
     return Promise.reject();
   return true;
 }),validationHandler(validationResult,'Invalid discount'),
-body('discountExpireDate').optional().isInt(),
+body('discountExpireDate').optional({nullable:true}).isInt(),
 validationHandler(validationResult,'Invalid Discount Expire Date'),
+body('discount').if(body('discountExpireDate').exists()).isInt(),
+validationHandler(validationResult,'Cannot add discount expire date without discount'),
 body('category','manufacturer').exists().isInt(),
 validationHandler(validationResult,'No Valid Category or Manufacturer Given'),
 productController.updateProduct
