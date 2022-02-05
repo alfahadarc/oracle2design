@@ -91,23 +91,21 @@ async function addProduct(req,res,next){
         var itemID=await productDBAPI.addProduct(title,price,summary,isFeatured,isContinued,updatedByUserName
             ,stock,discount,discountExpireDate,category,manufacturer);
         var numericComponents=req.body.numericComponents;
-        var nonnumericComponents=req.body.nonnumericComponents;
-        console.log(numericComponents);
+        var descriptiveComponents=req.body.descriptiveComponents;
         for( let i=0;i<numericComponents.length;i++){
             var numComp=numericComponents[i];
             if(await componentDBAPI.numericComponentExists(numComp.title)==false){
                 console.log(numComp +'does not exist');
                 continue;
             }
-            console.log('adding numComp '+numComp);
             await componentDBAPI.addNumericComponentToProduct(itemID,numComp.title,numComp.value);
         }
-        for(let i=0;i<nonnumericComponents.length;i++){
-            var nonNumComp=nonnumericComponents[i];
-            if(await componentDBAPI.descriptiveComponentExists(nonNumComp.title)==false){
+        for(let i=0;i<descriptiveComponents.length;i++){
+            var desComp=descriptiveComponents[i];
+            if(await componentDBAPI.descriptiveComponentExists(desComp.title)==false){
               continue;
             }
-            await componentDBAPI.addDescriptiveComponentToProduct(itemID,nonNumComp.title,nonNumComp.specification);
+            await componentDBAPI.addDescriptiveComponentToProduct(itemID,desComp.title,desComp.specification);
         }
         res.status(200).json(message.success('Product Added'));
     }catch(err){
