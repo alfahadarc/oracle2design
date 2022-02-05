@@ -72,8 +72,6 @@ body('discount').optional({nullable:true}).isInt().custom(value=>{
 }),validationHandler(validationResult,'Invalid discount'),
 body('discountExpireDate').optional({nullable:true}).isInt(),
 validationHandler(validationResult,'Invalid Discount Expire Date'),
-body('discount').if(body('discountExpireDate').exists()).isInt(),
-validationHandler(validationResult,'Cannot add discount expire date without discount'),
 body('category','manufacturer').exists().isInt(),
 validationHandler(validationResult,'No Valid Category or Manufacturer Given')
 ,productController.addProduct);
@@ -161,8 +159,6 @@ body('discount').optional({nullable:true}).isInt().custom(value=>{
 }),validationHandler(validationResult,'Invalid discount'),
 body('discountExpireDate').optional({nullable:true}).isInt(),
 validationHandler(validationResult,'Invalid Discount Expire Date'),
-body('discount').if(body('discountExpireDate').exists()).isInt(),
-validationHandler(validationResult,'Cannot add discount expire date without discount'),
 body('category','manufacturer').exists().isInt(),
 validationHandler(validationResult,'No Valid Category or Manufacturer Given'),
 productController.updateProduct
