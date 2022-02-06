@@ -26,7 +26,7 @@ const authorize = (permissions) => {
       req.body.token || req.query.token || req.headers["x-access-token"];
 
     if (!token) {
-      return res.status(400).json(message.error('A token is required for authentication'));
+      return res.status(401).json(message.error('You must log in'));
     }
     try {
       const decoded = jwt.verify(token, secret);

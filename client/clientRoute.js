@@ -5,6 +5,9 @@ const validationHandler=require('../middleware/validationHandler');
 const productController=require('./product/productController');
 const categoryController=require('./category/categoryController');
 const componentController=require('./component/componentController');
+const { authorize } = require("../middleware/authJWT");
+const role=require('../middleware/role');
+const cartController=require('./cart/cartController');
 
 router.get('/getCategoryProducts',
 query('categoryID').exists().isInt(),
@@ -25,5 +28,10 @@ router.get('/getProductComponents',
 query('productID').exists().isInt(),
 validationHandler(validationResult,'Invalid product ID'),
 componentController.getProductComponents);
+
+
+router.put('/addProductToCart',authorize([role.Client]),cartController.addProductToCart);
+router.get('/cartProductQuantity',authorize([role.Client]),cartController.getProductQuantityInCart);
+router.get('/getCartProducts',authorize([role.Client]),cartController.getCartProducts);
 
 module.exports=router;
