@@ -29,7 +29,9 @@ async function updateItemQuantityToCart(itemID, clientName, quantity) {
 
 async function getCartProducts(clientName) {
   var binds = { clientName };
-  var sql = `SELECT * FROM CLIENT_CART WHERE CLIENT_NAME=:clientName`;
+  var sql = `SELECT I.TITLE,CC.QUANTITY,CC.ITEM_ID
+  FROM CLIENT_CART CC JOIN ITEM I on CC.ITEM_ID = I.ITEM_ID
+  WHERE CC.CLIENT_NAME=:clientName`;
   var result = await database.simpleExecute(sql, binds);
   return result.rows;
 }

@@ -54,7 +54,7 @@ async function getCartProducts(req, res, next) {
 async function deleteItemFromCart(req,res,next){
     try{
         var clientName=req.username;
-        var itemID=req.body.itemID;
+        var itemID=req.query.itemID;
         await cartDBAPI.deleteItemFromCart(clientName,itemID);
         res.status(200).json(message.success('Item Deleted'));
     }catch(error){
