@@ -21,6 +21,21 @@ async function getAllCategories(req,res,next){
     }
 }
 
+async function getCategoryID(req,res,next){
+    try{
+        var categoryName=req.query.categoryName;
+        var categoryID=await categoryDBAPI.getCategoryID(categoryName);
+        if(categoryID==null){
+            res.status(404).json(message.error('Category not found'));
+            return;
+        }
+        else{
+            res.status(200).json({CATEGORY_ID:categoryID});
+        }
+    }catch(error){
+        res.status(500).json(message.internalServerError());
+    }
+}
 
 
-module.exports={getCategoryProducts,getAllCategories};
+module.exports={getCategoryProducts,getAllCategories,getCategoryID};

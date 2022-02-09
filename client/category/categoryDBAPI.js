@@ -1,3 +1,4 @@
+const e = require('express');
 const database=require('../../services/database');
 
 
@@ -18,5 +19,14 @@ async function getAllCategoriesFromDB(){
     return result.rows;
 }
 
+async function getCategoryID(categoryName){
+    var binds={categoryName};
+    var sql='SELECT CATEGORY_ID FROM CATEGORY WHERE CATEGORY_NAME= :categoryName';
+    var result=await database.simpleExecute(sql,binds);
+    if(result.rows.length>0)
+        return result.rows[0].CATEGORY_ID;
+    return null;
+}
 
-module.exports={getCategoryProductsFromDB,getAllCategoriesFromDB};
+
+module.exports={getCategoryProductsFromDB,getAllCategoriesFromDB,getCategoryID};

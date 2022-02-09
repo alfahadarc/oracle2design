@@ -35,4 +35,6 @@ router.get('/cartProductQuantity',authorize([role.Client]),cartController.getPro
 router.get('/getCartProducts',authorize([role.Client]),cartController.getCartProducts);
 router.get('/getFeaturedProducts',productController.getFeaturedProducts);
 
+router.get('/getCategoryID',categoryController.getCategoryID);
+
 module.exports=router;
