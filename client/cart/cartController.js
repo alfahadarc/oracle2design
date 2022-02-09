@@ -51,8 +51,21 @@ async function getCartProducts(req, res, next) {
   }
 }
 
+async function deleteItemFromCart(req,res,next){
+    try{
+        var clientName=req.username;
+        var itemID=req.body.itemID;
+        await cartDBAPI.deleteItemFromCart(clientName,itemID);
+        res.status(200).json(message.success('Item Deleted'));
+    }catch(error){
+        res.status(500).json(message.internalServerError());
+    }
+}
+
+
 module.exports = {
   getProductQuantityInCart,
   addProductToCart,
   getCartProducts,
+  deleteItemFromCart
 };

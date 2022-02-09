@@ -36,5 +36,6 @@ router.get('/getCartProducts',authorize([role.Client]),cartController.getCartPro
 router.get('/getFeaturedProducts',productController.getFeaturedProducts);
 
 router.get('/getCategoryID',categoryController.getCategoryID);
+router.delete('/deleteCartItem',authorize([role.Client]),cartController.deleteItemFromCart);
 
 module.exports=router;

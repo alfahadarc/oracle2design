@@ -34,8 +34,15 @@ async function getCartProducts(clientName) {
   return result.rows;
 }
 
+async function deleteItemFromCart(clientName,itemID){
+    var sql=`DELETE FROM CLIENT_CART WHERE CLIENT_NAME=:clientName AND ITEM_ID=:itemID`;
+    var binds={clientName,itemID};
+    await database.simpleExecute(sql,binds);
+}
+
 module.exports = {
   getItemQuantityInCart,
   updateItemQuantityToCart,
   getCartProducts,
+  deleteItemFromCart
 };
