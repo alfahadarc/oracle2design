@@ -31,7 +31,7 @@ async function getFeaturedProductsFromDB(){
     FROM ITEM I JOIN PRODUCT P on I.ITEM_ID = P.ITEM_ID
     JOIN MANUFACTURER M on P.MANUFACTURER = M.MANUFACTURER_ID
     JOIN CATEGORY C2 on P.CATEGORY = C2.CATEGORY_ID
-    WHERE I.IS_FEATURED=1`;
+    WHERE I.IS_FEATURED=1 AND I.IS_CONTINUED`;
     var result= await database.simpleExecute(sql,binds);
     return result.rows;
 }
