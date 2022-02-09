@@ -41,4 +41,14 @@ async function getProductMainImage(req, res, next) {
     }
 }
 
-module.exports = { getProduct ,getProductMainImage};
+
+async function getFeaturedProducts(req,res,next){
+    try{
+        var featuredProducts= await productDBAPI.getFeaturedProductsFromDB();
+        res.json(featuredProducts);
+    }catch(error){
+        res.status(500).json(message.internalServerError());
+    }
+}
+
+module.exports = { getProduct ,getProductMainImage,getFeaturedProducts};

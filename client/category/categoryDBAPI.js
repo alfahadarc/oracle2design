@@ -6,7 +6,7 @@ async function getCategoryProductsFromDB(categoryID){
     var sql=`select ITEM.*, STOCK, DISCOUNT, DISCOUNT_EXPIRE_DATE, TUTORIAL_VIDE0, THREE_DIM_MODEL,CATEGORY,MANUFACTURER, 
     MANUFACTURER_NAME from ITEM JOIN PRODUCT ON ITEM.ITEM_ID=PRODUCT.ITEM_ID
     JOIN MANUFACTURER ON PRODUCT.MANUFACTURER=MANUFACTURER.MANUFACTURER_ID
-    where PRODUCT.CATEGORY=:categoryID`;
+    where PRODUCT.CATEGORY=:categoryID AND ITEM.IS_CONTINUED=1`;
     binds.categoryID=categoryID;
     var result=await database.simpleExecute(sql,binds);
     return result.rows;

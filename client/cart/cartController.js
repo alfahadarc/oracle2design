@@ -6,6 +6,7 @@ const productDBAPI=require('../product/productDBAPI');
 async function getProductQuantityInCart(req,res,next){
     try{
         var productID=req.body.productID;
+        console.log(productID);
         var username=req.username;
         // var quantity=req.body.quantity;
         var productExists=await productDBAPI.productExists(productID);
@@ -36,6 +37,7 @@ async function addProductToCart(req,res,next){
             return;
         }
         else{
+            await cartDBAPI.updateItemQuantityToCart(productID,username,quantity);
             res.status(200).json(message.success('Added to Cart'));
         }
     }catch(error){

@@ -25,6 +25,17 @@ async function productExists(productID){
     return result.rows.length>0;
 }
 
+async function getFeaturedProductsFromDB(){
+    var binds={};
+    var sql=`SELECT I.*, STOCK, DISCOUNT, DISCOUNT_EXPIRE_DATE, TUTORIAL_VIDE0, THREE_DIM_MODEL,M.MANUFACTURER_ID,M.MANUFACTURER_NAME,C2.CATEGORY_NAME,C2.CATEGORY_ID
+    FROM ITEM I JOIN PRODUCT P on I.ITEM_ID = P.ITEM_ID
+    JOIN MANUFACTURER M on P.MANUFACTURER = M.MANUFACTURER_ID
+    JOIN CATEGORY C2 on P.CATEGORY = C2.CATEGORY_ID
+    WHERE I.IS_FEATURED=1`;
+    var result= await database.simpleExecute(sql,binds);
+    return result.rows;
+}
 
 
-module.exports={getProductFromDB,productExists};
+
+module.exports={getProductFromDB,productExists,getFeaturedProductsFromDB};

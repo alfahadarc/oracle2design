@@ -33,5 +33,6 @@ componentController.getProductComponents);
 router.put('/addProductToCart',authorize([role.Client]),cartController.addProductToCart);
 router.get('/cartProductQuantity',authorize([role.Client]),cartController.getProductQuantityInCart);
 router.get('/getCartProducts',authorize([role.Client]),cartController.getCartProducts);
+router.get('/getFeaturedProducts',productController.getFeaturedProducts);
 
 module.exports=router;

@@ -2,6 +2,7 @@
 const database=require('../../services/database');
 
 async function getItemQuantityInCart(itemID,clientName){
+    console.log(itemID);
     var sql=`SELECT QUANTITY FROM CLIENT_CART WHERE CLIENT_NAME= :clientName AND ITEM_ID = :itemID`;
     var binds={clientName,itemID};
     var result=await database.simpleExecute(sql,binds);
@@ -30,8 +31,8 @@ async function updateItemQuantityToCart(itemID,clientName,quantity){
 
 async function getCartProducts(clientName){
     var binds={clientName};
-    var sql=`SELECT * FROM CLIENT_CART WHERE CLIENT_NAME:=clientName`;
-    var result=database.simpleExecute(sql,binds);
+    var sql=`SELECT * FROM CLIENT_CART WHERE CLIENT_NAME= :clientName`;
+    var result=await database.simpleExecute(sql,binds);
     return result.rows;
 }
 
