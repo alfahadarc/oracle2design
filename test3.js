@@ -106,9 +106,9 @@ function getForest(commentData){
     }
     return forest;
 }
-console.log(getRoots(commentData));
+// console.log(getRoots(commentData));
 
-console.log(getChildren(commentData,3));
+// console.log(getChildren(commentData,3));
 
 console.log(getForest(commentData));
 

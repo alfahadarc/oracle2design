@@ -11,6 +11,7 @@ const cartController=require('./cart/cartController');
 const commentController=require('./comment/commentController');
 const reviewController=require('./review/reviewController');
 const loginInfoController=require('./loginInfo/loginInfoController');
+const signupController=require('./signup/signupController');
 
 router.get('/getCategoryProducts',
 query('categoryID').exists().isInt(),
@@ -56,6 +57,10 @@ router.delete('/deleteReview',authorize([role.Client]),reviewController.deleteRe
 
 
 router.get('/currentUser',authorize([role.Client]),loginInfoController.getCurrentUser);
+
+
+
+router.post('/signup',signupController.addClient);
 
 router.get('/test',body('title').if(body('description').exists({checkFalsy:true})).exists(),validationHandler(validationResult,'error'),
 (req,res)=>res.send('ok'));
