@@ -73,8 +73,82 @@ async function updateOfferProduct(req,res,next){
     }
 }
 
+async function updateOfferFreeProduct(req,res,next){
+    try{
+        var {offerID,productID,count}=req.body;
+        var productExistsInOffer=await offerDBAPI.offerIncludesFreeProduct(offerID,productID);
+        if(productExistsInOffer==false){
+            res.status(400).json(message.error('Non Existent product to update'));
+            return;
+        }
+        await offerDBAPI.updateOfferFreeProduct(offerID,productID,count);
+        res.status(200).json(message.success('Offer updated'));
+    }catch(err){
+        console.log(err);
+        res.status(500).json(message.internalServerError());
+    }
+}
+
+
+async function addOfferProduct(req,res,next){
+    try{
+        var {offerID,productID,count}=req.body;
+        var productExistsInOffer=await offerDBAPI.offerIncludesProduct(offerID,productID);
+        if(productExistsInOffer==true){
+            res.status(400).json(message.error('Product already exists in offer'));
+            return;
+        }
+        await offerDBAPI.addOfferProduct(offerID,productID,count);
+        res.status(200).json(message.success('Product Added to Offer'));
+    }catch(err){
+        console.log(err);
+        res.status(500).json(message.internalServerError());
+    }
+}
+
+async function addOfferFreeProduct(req,res,next){
+    try{
+        var {offerID,productID,count}=req.body;
+        var productExistsInOffer=await offerDBAPI.offerIncludesFreeProduct(offerID,productID);
+        if(productExistsInOffer==true){
+            res.status(400).json(message.error('Free Product already exists in offer'));
+            return;
+        }
+        await offerDBAPI.addOfferFreeProduct(offerID,productID,count);
+        res.status(200).json(message.success('Product Added to Offer'));
+    }catch(err){
+        console.log(err);
+        res.status(500).json(message.internalServerError());
+    }
+}
+
+async function getOffer(req,res,next){
+    try{
+        var offerID=req.query.offerID;
+        var offer=await offerDBAPI.getOffer(offerID);
+        res.status(200).json(offer);
+    }catch(err){
+        console.log(err);
+        res.status(500).json(message.internalServerError());
+    }
+}
+
+async function getOfferProducts(req,res,next){
+    try{
+        var offerID=req.query.offerID;
+        var products=await offerDBAPI.getOfferProducts(offerID);
+        var freeProducts=await offerDBAPI.getOfferFreeProducts(offerID);
+        res.status(200).json({products,freeProducts});
+    }catch(err){
+        console.log(err);
+        res.status(500).json(message.internalServerError());
+    }
+}
+
 
 
 
 module.exports={addOffer,getOffers,updateOffer,
-    deleteProductFromOffer,deleteFreeProductFromOffer,updateOfferProduct};
+    deleteProductFromOffer,deleteFreeProductFromOffer,
+    updateOfferProduct,updateOfferFreeProduct,
+    addOfferProduct,addOfferFreeProduct,getOffer,getOfferProducts};

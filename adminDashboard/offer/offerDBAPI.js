@@ -47,6 +47,7 @@ async function getOffers(){
     return result.rows;
 }
 
+
 async function updateOffer(offerID,title,price,summary,isFeatured,isContinued,updatedByUserName,expireDate){
     var currentTime=Date.now();
     var sql=`UPDATE ITEM SET TITLE=:title,PRICE=:price,SUMMARY=:summary,IS_FEATURED=:isFeatured,
@@ -122,9 +123,15 @@ async function offerIncludesFreeProduct(offerID,productID){
     return false;
 }
 
+async function getOffer(offerID){
+    var sql=`SELECT * FROM ITEM I JOIN OFFER O ON I.ITEM_ID=O.ITEM_ID WHERE O.ITEM_ID=:offerID`;
+    var result=await database.simpleExecute(sql,{offerID});
+    return result.rows;
+}
+
 
 
 module.exports={addOffer,getOffers,updateOffer,deleteProductFromOffer,
     deleteFreeProductFromOffer,updateOfferProduct,updateOfferFreeProduct,
 addOfferProduct,addOfferFreeProduct,getOfferProducts,getOfferFreeProducts,
-offerIncludesProduct,offerIncludesFreeProduct};
+offerIncludesProduct,offerIncludesFreeProduct,getOffer};
