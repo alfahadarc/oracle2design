@@ -126,6 +126,10 @@ async function getOffer(req,res,next){
     try{
         var offerID=req.query.offerID;
         var offer=await offerDBAPI.getOffer(offerID);
+        if(offer==null){
+            res.status(400).json(message.error('offer does not exist'));
+            return;
+        }
         res.status(200).json(offer);
     }catch(err){
         console.log(err);

@@ -126,7 +126,9 @@ async function offerIncludesFreeProduct(offerID,productID){
 async function getOffer(offerID){
     var sql=`SELECT * FROM ITEM I JOIN OFFER O ON I.ITEM_ID=O.ITEM_ID WHERE O.ITEM_ID=:offerID`;
     var result=await database.simpleExecute(sql,{offerID});
-    return result.rows;
+    if(result.rows.length>0)
+        return result.rows[0];
+    return null;
 }
 
 
