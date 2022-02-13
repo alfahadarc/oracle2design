@@ -9,6 +9,7 @@ const { check,validationResult,query,body,checkSchema} = require("express-valida
 const validationHandler=require('../middleware/validationHandler');
 const message=require('../middleware/message');
 const componentController=require('./component/componentController');
+const offerController=require('./offer/offerController');
 
 const router = express.Router();
 
@@ -167,3 +168,7 @@ productController.updateProduct
 
 router.get('/allNumericComponents',componentController.getAllNumericComponents);
 router.get('/allDescriptiveComponents',componentController.getDescriptiveComponents);
+
+/* Offer routes TO-DO add validator */
+
+router.post('/addOffer',offerController.addOffer);
