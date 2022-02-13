@@ -181,5 +181,4 @@ router.put('/updateOfferFreeProduct',offerController.updateOfferFreeProduct);
 router.post('/addOfferProduct',offerController.addOfferProduct);
 router.post('/addOfferFreeProduct',offerController.addOfferFreeProduct);
 router.get('/getOffer',offerController.getOffer);
-router.get('/getOffers',offerController.getOffers);
 router.get('/getOfferProducts',offerController.getOfferProducts);
