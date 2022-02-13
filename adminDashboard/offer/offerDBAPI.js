@@ -89,7 +89,7 @@ async function addOfferFreeProduct(offerID,productID,count){
 
 
 async function getOfferProducts(offerID){
-    var sql=`SELECT O.COUNT,I.TITLE,O.PRODUCT_ID
+    var sql=`SELECT O.COUNT,I.TITLE,O.PRODUCT_ID,O.OFFER_ID
     FROM OFFER_PRODUCTS O
     JOIN ITEM I on O.PRODUCT_ID = I.ITEM_ID
     WHERE O.OFFER_ID=:offerID`;
@@ -98,7 +98,7 @@ async function getOfferProducts(offerID){
 }
 
 async function getOfferFreeProducts(offerID){
-    var sql=`SELECT O.COUNT,I.TITLE,O.PRODUCT_ID
+    var sql=`SELECT O.COUNT,I.TITLE,O.PRODUCT_ID,O.OFFER_ID
     FROM OFFER_FREE_PRODUCTS O
     JOIN ITEM I on O.PRODUCT_ID = I.ITEM_ID
     WHERE O.OFFER_ID=:offerID`;

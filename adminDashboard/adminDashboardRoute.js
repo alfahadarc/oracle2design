@@ -172,3 +172,8 @@ router.get('/allDescriptiveComponents',componentController.getDescriptiveCompone
 /* Offer routes TO-DO add validator */
 
 router.post('/addOffer',offerController.addOffer);
+router.put('/updateOffer',offerController.updateOffer);
+router.get('/allOffers',offerController.getOffers);
+router.delete('/deleteOfferProduct',offerController.deleteProductFromOffer);
+router.delete('/deleteOfferFreeProduct',offerController.deleteFreeProductFromOffer);
+router.put('/updateOfferProduct',offerController.updateOfferProduct);

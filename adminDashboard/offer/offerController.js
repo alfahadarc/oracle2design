@@ -35,6 +35,46 @@ async function updateOffer(req,res,next){
     }
 }
 
+async function deleteProductFromOffer(req,res,next){
+    try{
+        var {offerID,productID}=req.query;
+        await offerDBAPI.deleteProductFromOffer(offerID,productID);
+        res.status(200).json(message.success('Product deleted from offer'));
+    }catch(err){
+        console.log(err);
+        res.status(500).json(message.internalServerError());
+    }
+}
+
+async function deleteFreeProductFromOffer(req,res,next){
+    try{
+        var {offerID,productID}=req.query;
+        await offerDBAPI.deleteFreeProductFromOffer(offerID,productID);
+        res.status(200).json(message.success('Product deleted from offer'));
+    }catch(err){
+        console.log(err);
+        res.status(500).json(message.internalServerError());
+    }
+}
+
+async function updateOfferProduct(req,res,next){
+    try{
+        var {offerID,productID,count}=req.body;
+        var productExistsInOffer=await offerDBAPI.offerIncludesProduct(offerID,productID);
+        if(productExistsInOffer==false){
+            res.status(400).json(message.error('Non Existent product to update'));
+            return;
+        }
+        await offerDBAPI.updateOfferProduct(offerID,productID,count);
+        res.status(200).json(message.success('Offer updated'));
+    }catch(err){
+        console.log(err);
+        res.status(500).json(message.internalServerError());
+    }
+}
 
 
-module.exports={addOffer,getOffers,updateOffer};
+
+
+module.exports={addOffer,getOffers,updateOffer,
+    deleteProductFromOffer,deleteFreeProductFromOffer,updateOfferProduct};
