@@ -10,6 +10,7 @@ const validationHandler=require('../middleware/validationHandler');
 const message=require('../middleware/message');
 const componentController=require('./component/componentController');
 const offerController=require('./offer/offerController');
+const res = require("express/lib/response");
 
 const router = express.Router();
 
@@ -182,3 +183,19 @@ router.post('/addOfferProduct',offerController.addOfferProduct);
 router.post('/addOfferFreeProduct',offerController.addOfferFreeProduct);
 router.get('/getOffer',offerController.getOffer);
 router.get('/getOfferProducts',offerController.getOfferProducts);
+
+router.post('/uploadTutorialVideo',
+productController.uploadTutorialVideoMulter.single('tutorialVideo'),
+(req,res,next)=>{
+  res.status(200).json(message.success('Video Uploaded'));
+});
+
+router.get('/tutorialVideo',productController.getTutorialVideo);
+
+router.post('/uploadOfferImage',offerController.uploadOfferImageMulter.single('offerImage'),
+(req,res)=>{
+  res.status(200).json(message.success('Offer image uploaded'));
+});
+
+router.get('/offerMainImage',offerController.getOfferMainImage);
+

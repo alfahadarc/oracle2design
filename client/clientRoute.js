@@ -12,6 +12,8 @@ const commentController=require('./comment/commentController');
 const reviewController=require('./review/reviewController');
 const loginInfoController=require('./loginInfo/loginInfoController');
 const signupController=require('./signup/signupController');
+const searchController=require('./search/searchController');
+const offerController=require('./offer/offerController');
 
 router.get('/getCategoryProducts',
 query('categoryID').exists().isInt(),
@@ -40,6 +42,7 @@ router.put('/addProductToCart',authorize([role.Client]),cartController.addProduc
 router.get('/cartProductQuantity',authorize([role.Client]),cartController.getProductQuantityInCart);
 router.get('/getCartProducts',authorize([role.Client]),cartController.getCartProducts);
 router.get('/getFeaturedProducts',productController.getFeaturedProducts);
+router.get('/productTutorialVideo',productController.getTutorialVideo);
 
 router.get('/getCategoryID',categoryController.getCategoryID);
 router.delete('/deleteCartItem',authorize([role.Client]),cartController.deleteItemFromCart);
@@ -57,12 +60,22 @@ router.delete('/deleteReview',authorize([role.Client]),reviewController.deleteRe
 
 
 router.get('/currentUser',authorize([role.Client]),loginInfoController.getCurrentUser);
-
-
-
 router.post('/signup',signupController.addClient);
 
-router.get('/test',body('title').if(body('description').exists({checkFalsy:true})).exists(),validationHandler(validationResult,'error'),
-(req,res)=>res.send('ok'));
+router.get('/searchItem',searchController.getSimilarItems);
+
+
+router.get('/offerMainImage',offerController.getOfferMainImage);
+
+
+router.post('/test',(req,res,next)=>{
+    console.log(req.query);
+    console.log(req.body);
+    res.send('ok');
+});
+
+
+
+
 
 module.exports=router;

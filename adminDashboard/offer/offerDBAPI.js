@@ -131,9 +131,16 @@ async function getOffer(offerID){
     return null;
 }
 
+async function offerExists(offerID){
+    var binds={offerID};
+    var sql=`SELECT ITEM_ID FROM OFFER WHERE ITEM_ID=:offerID`;
+    var result= await database.simpleExecute(sql,binds);
+    return result.rows.length>0;
+}
+
 
 
 module.exports={addOffer,getOffers,updateOffer,deleteProductFromOffer,
     deleteFreeProductFromOffer,updateOfferProduct,updateOfferFreeProduct,
 addOfferProduct,addOfferFreeProduct,getOfferProducts,getOfferFreeProducts,
-offerIncludesProduct,offerIncludesFreeProduct,getOffer};
+offerIncludesProduct,offerIncludesFreeProduct,getOffer,offerExists};

@@ -1,5 +1,8 @@
 const message=require('../../middleware/message');
 const offerDBAPI=require('./offerDBAPI');
+const multer=require('multer');
+const path=require('path');
+const fs=require('fs');
 
 async function addOffer(req,res,next){
     try{
@@ -149,10 +152,70 @@ async function getOfferProducts(req,res,next){
     }
 }
 
+const uploadOfferImageMulter=multer(
+    {
+        storage:multer.diskStorage(
+            {
+                filename: function (req, file, cb) {
+                    var offerID = req.query.offerID;
+                    var fileName = offerID + '.png';
+                    cb(null, fileName);
+                  },
+                destination: function (req, file, cb) {
+                    cb(null, process.env.OFFER_MAIN_IMAGE_PATH);
+                }
+            }
+        ),
+        limits:{
+            fileSize:10485760 //10 megabyte
+        },
+        fileFilter:async (req, file, cb) => {
+            try {
+              var filePattern = /png/;
+              if (!filePattern.test(file.mimetype) || !(file.originalname.toLowerCase().endsWith('.png'))) {
+                cb(message.error('Only png files are allowed'), false);
+                return;
+              }
+              var offerID = req.query.offerID;
+              var offerExists = await offerDBAPI.offerExists(offerID);
+              if (!offerExists) {
+                cb(message.error('Offer does not exist'), false);
+                return;
+              }
+              else
+                cb(null, true);
+            } catch (err) {
+              cb(message.internalServerError());
+            }
+          }
+    }
+);
 
 
+async function getOfferMainImage(req, res, next) {
+    try {
+      var offerID = req.query.offerID;
+      if (await offerDBAPI.offerExists(offerID)) {
+        var imageName = offerID + '.png';
+        var filePath = path.join(__dirname, '../../', process.env.OFFER_MAIN_IMAGE_PATH, imageName);
+        if (fs.existsSync(filePath)) {
+          res.status(200).sendFile(filePath);
+        }
+        else {
+          filePath = path.join(__dirname, '../../', process.env.OFFER_MAIN_IMAGE_PATH, 'default.png');
+          res.status(200).sendFile(filePath);
+        }
+      }
+      else
+        res.status(400).json(message.error('Offer does not exist'));
+    } catch (err) {
+        console.log(err);
+      res.status(500).json(message.internalServerError());
+    }
+  }
 
 module.exports={addOffer,getOffers,updateOffer,
     deleteProductFromOffer,deleteFreeProductFromOffer,
     updateOfferProduct,updateOfferFreeProduct,
-    addOfferProduct,addOfferFreeProduct,getOffer,getOfferProducts};
+    addOfferProduct,addOfferFreeProduct,getOffer,getOfferProducts,
+uploadOfferImageMulter,getOfferMainImage};
