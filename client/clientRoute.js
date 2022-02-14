@@ -66,6 +66,10 @@ router.get('/searchItem',searchController.getSimilarItems);
 
 
 router.get('/offerMainImage',offerController.getOfferMainImage);
+router.get('/getOffers',offerController.getOffers);
+router.get('/getOffer',offerController.getOffer);
+router.get('/getFeaturedOffers',offerController.getFeaturedOffers);
+router.get('/getOfferProducts',offerController.getOfferProducts);
 
 
 router.post('/test',(req,res,next)=>{

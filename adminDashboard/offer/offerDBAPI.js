@@ -1,5 +1,5 @@
 const database=require('../../services/database');
-const productDBAPI=require('../product/productDBAPI');
+
 
 async function addOffer(title,price,summary,isFeatured,isContinued,expireDate,freeProducts,products,updatedByUserName){
     var type='OFFER';
