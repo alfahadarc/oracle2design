@@ -60,6 +60,7 @@ const uploadTutorialVideoMulter = multer({
   },
   fileFilter: async (req, file, cb) => {
     try {
+      // console.log('here');
       var filePattern = /mp4/;
       if (!filePattern.test(file.mimetype) || (!file.originalname.endsWith('.mp4'))) {
         cb(message.error('Only mp4 files are allowed'), false);

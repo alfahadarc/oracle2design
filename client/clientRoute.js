@@ -14,6 +14,8 @@ const loginInfoController=require('./loginInfo/loginInfoController');
 const signupController=require('./signup/signupController');
 const searchController=require('./search/searchController');
 const offerController=require('./offer/offerController');
+const wishlistController=require('./wishlist/wishlistController');
+const notificationController=require('./notification/notificationController');
 
 router.get('/getCategoryProducts',
 query('categoryID').exists().isInt(),
@@ -71,6 +73,16 @@ router.get('/getOffer',offerController.getOffer);
 router.get('/getFeaturedOffers',offerController.getFeaturedOffers);
 router.get('/getOfferProducts',offerController.getOfferProducts);
 
+
+router.post('/addItemToWishlist',authorize([role.Client]),wishlistController.addItemToWishList);
+router.delete('/removeItemFromWishlist',authorize([role.Client]),wishlistController.removeItemFromWishlist);
+router.get('/itemExistInWishList',authorize([role.Client]),wishlistController.itemExistInWishList);
+router.get('/getWishlistItems',authorize([role.Client]),wishlistController.getWishlistItems);
+
+router.get('/getAllNotifications',authorize([role.Client]),notificationController.getAllNotifications);
+router.get('/getUnseenNotificationCount',authorize([role.Client]),notificationController.getUnseenNotificationCount);
+router.delete('/deleteNotification',authorize([role.Client]),notificationController.deleteNotification);
+router.put('/setNotificationAsSeen',authorize([role.Client]),notificationController.setNotificationAsSeen);
 
 router.post('/test',(req,res,next)=>{
     console.log(req.query);
