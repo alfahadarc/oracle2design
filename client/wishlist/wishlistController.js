@@ -11,7 +11,7 @@ async function addItemToWishList(req,res,next){
             res.status(200).json(message.success('Already added to wishlist'));
             return;
         }
-        if((await productDBAPI.productIDExists(itemID)==false) ||(await offerDBAPI.offerExists(itemID)==false)){
+        if((await productDBAPI.productIDExists(itemID)==false) && (await offerDBAPI.offerExists(itemID)==false)){
             res.status(404).json(message.error('Item not found'));
             return;
         }
