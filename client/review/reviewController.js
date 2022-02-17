@@ -4,8 +4,18 @@ const reviewDBAPI=require('./reviewDBAPI');
 async function getAllReviews(req,res,next){
     try{
         var productID=req.query.productID;
-        var reviews=await reviewDBAPI.getAllReviews(req.username,productID);
+        var reviews=await reviewDBAPI.getAllReviews(productID);
         res.status(200).json(reviews);
+    }catch(error){ 
+        res.status(500).json(message.internalServerError());
+    }
+}
+
+async function getAverageRating(req,res,next){
+    try{
+        var productID=req.query.productID;
+        var avg=await reviewDBAPI.getAverageRating(productID);
+        res.status(200).json({AVERAGE:avg});
     }catch(error){ 
         res.status(500).json(message.internalServerError());
     }
@@ -34,4 +44,4 @@ async function deleteReview(req,res,next){
     }
 }
 
-module.exports={getAllReviews,addReview,deleteReview};
+module.exports={getAllReviews,addReview,deleteReview,getAverageRating};

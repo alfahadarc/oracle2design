@@ -1,9 +1,17 @@
 const database=require('../../services/database');
 
-async function getAllReviews(userName,productID){
+async function getAllReviews(productID){
     var sql=`SELECT * FROM REVIEW WHERE PRODUCT_ID=:productID`;
     var result=await database.simpleExecute(sql,{productID});
     return result.rows;
+}
+
+async function getAverageRating(productID){
+    var sql=`SELECT ROUND(AVG(RATING),1) as AVG FROM REVIEW WHERE PRODUCT_ID=:productID`;
+    var result=await database.simpleExecute(sql,{productID});
+    if(result.rows[0].AVG===null)
+        return 0;
+    return result.rows[0].AVG;
 }
 
 async function addReview(userName,productID,title,description,rating){
@@ -18,4 +26,4 @@ async function deleteReview(userName,productID){
     await database.simpleExecute(sql,{userName,productID});
 }
 
-module.exports={getAllReviews,addReview,deleteReview};
+module.exports={getAllReviews,addReview,deleteReview,getAverageRating};
