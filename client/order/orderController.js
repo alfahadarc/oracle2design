@@ -27,8 +27,8 @@ async function placeOrder (req,res,next){
                 refillProducts:enoughStock.refillProducts});
             return;         
         }
-        await orderDBAPI.placeOrder(orderItems,destinationAddress,currentTime,destinationSubDistrict,clientName);
-        res.status(200).json(message.success('Order Placed'));
+        var orderID= await orderDBAPI.placeOrder(orderItems,destinationAddress,currentTime,destinationSubDistrict,clientName);
+        res.status(200).json({ORDER_ID:orderID});
     }catch(err){
         console.log(err);
         res.status(500).json(message.internalServerError());
@@ -37,7 +37,7 @@ async function placeOrder (req,res,next){
 
 async function confirmPayment(req,res,next){
     try{
-        var {orderID,paidAmount}=req.query;
+        var {orderID,paidAmount}=req.body;
         var currentTime=Date.now();
         var order=await orderDBAPI.getOrder(orderID);
         if(order==null){
@@ -109,6 +109,27 @@ async function getOrder(req,res,next){
     }
 }
 
+async function getOrderItems(req,res,next){
+    try{
+        var clientName=req.username;
+        var orderID=req.query.orderID;
+        var order=await orderDBAPI.getOrder(orderID);
+        if(order==null){
+            res.status(400).json(message.error('Order does not exist'));
+            return;
+        }
+        if(order.CLIENT_NAME!=clientName){
+            res.status(400).json(message.error('You do not have permission to view this order'));
+            return;
+        }
+        var {products,offers}=await orderDBAPI.getOrderItems(orderID);
+        res.status(200).json({products,offers});
+    }catch(err){
+        console.log(err);
+        res.status(500).json(message.internalServerError());
+    }
+}
+
 async function getOrders(req,res,next){
     try{
         var clientName=req.username;
@@ -122,4 +143,4 @@ async function getOrders(req,res,next){
 
 
 
-module.exports={placeOrder,confirmPayment,cancelOrder,getOrder,getOrders};
+module.exports={placeOrder,confirmPayment,cancelOrder,getOrder,getOrders,getOrderItems};

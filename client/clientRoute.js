@@ -94,6 +94,7 @@ router.post('/confirmOrderPayment',authorize([role.Client]),orderController.conf
 router.delete('/cancelOrder',authorize([role.Client]),orderController.cancelOrder);
 router.get('/getOrders',authorize([role.Client]),orderController.getOrders);
 router.get('/getOrder',authorize([role.Client]),orderController.getOrder);
+router.get('/getOrderItems',authorize([role.Client]),orderController.getOrderItems);
 
 
 router.get('/getDistricts',locationController.getAllDistricts);

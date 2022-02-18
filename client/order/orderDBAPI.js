@@ -11,11 +11,30 @@ async function getOrders(clientName){
 }
 
 async function getOrder(orderID){
-    var result=await database.simpleExecute(`SELECT * FROM "ORDER"
+    var result=await database.simpleExecute(`SELECT O.*,D.DELIVERY_COST FROM "ORDER" O
+    JOIN SUB_DISTRICT SD on O.DESTINATION_SUB_DISTRICT = SD.SUB_DISTRICT_ID
+    JOIN DISTRICT D on SD.DISTRICT_ID = D.DISTRICT_ID
     WHERE ORDER_ID=:orderID`,{orderID});
     if(result.rows.length>0)
         return result.rows[0];
     return null;
+}
+
+async function getOrderItems(orderID){
+    var productSql=`SELECT OT.ITEM_ID,OT.QUANTITY,I.TITLE,I.PRICE,NVL(P.DISCOUNT,0) DISCOUNT
+    FROM ORDER_ITEM OT JOIN ITEM I on OT.ITEM_ID = I.ITEM_ID
+    JOIN PRODUCT P on I.ITEM_ID = P.ITEM_ID
+    WHERE ORDER_ID=:orderID`;
+    var result=await database.simpleExecute(productSql,{orderID});
+    var products=result.rows;
+    var offerSql=`
+    SELECT OT.ITEM_ID,OT.QUANTITY,I.TITLE,I.PRICE
+    FROM ORDER_ITEM OT JOIN ITEM I on OT.ITEM_ID = I.ITEM_ID
+    JOIN OFFER O on I.ITEM_ID = O.ITEM_ID
+    WHERE ORDER_ID=:orderID`;
+    result=await database.simpleExecute(offerSql,{orderID});
+    var orders=result.rows;
+    return {products,orders};
 }
 
 async function checkOfferExpired(orderItems,currentTime) {
@@ -146,6 +165,7 @@ async function placeOrder(orderItems,destinationAddress,orderDate,destinationSub
          VALUES(:orderID,:itemID,:quantity)`;
          await database.simpleExecute(orderItemSql,{orderID,itemID:orderItems[i].itemID,quantity:orderItems[i].quantity});
     }
+    return orderID;
 }
 
 
@@ -161,4 +181,4 @@ async function cancelOrder(orderID){
 }
 
 module.exports = { checkEnoughStock, checkOfferExpired,placeOrder,
-calculateTotalPrice,confirmPayment,getOrders,getOrder,cancelOrder};
+calculateTotalPrice,confirmPayment,getOrders,getOrder,cancelOrder,getOrderItems};
