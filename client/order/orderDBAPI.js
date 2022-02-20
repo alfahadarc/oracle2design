@@ -11,9 +11,7 @@ async function getOrders(clientName){
 }
 
 async function getOrder(orderID){
-    var result=await database.simpleExecute(`SELECT O.*,D.DELIVERY_COST FROM "ORDER" O
-    JOIN SUB_DISTRICT SD on O.DESTINATION_SUB_DISTRICT = SD.SUB_DISTRICT_ID
-    JOIN DISTRICT D on SD.DISTRICT_ID = D.DISTRICT_ID
+    var result=await database.simpleExecute(`SELECT O.* FROM "ORDER" O
     WHERE ORDER_ID=:orderID`,{orderID});
     if(result.rows.length>0)
         return result.rows[0];
@@ -21,14 +19,14 @@ async function getOrder(orderID){
 }
 
 async function getOrderItems(orderID){
-    var productSql=`SELECT OT.ITEM_ID,OT.QUANTITY,I.TITLE,I.PRICE,NVL(P.DISCOUNT,0) DISCOUNT,(ROUND((I.PRICE-(I.PRICE* NVL(P.DISCOUNT,0))/100.0),2)) DISCOUNTED_PRICE
-    FROM ORDER_ITEM OT JOIN ITEM I on OT.ITEM_ID = I.ITEM_ID
-    JOIN PRODUCT P on I.ITEM_ID = P.ITEM_ID
+    var productSql=`SELECT OI.ITEM_ID,OI.DISCOUNT,OI.UNIT_PRICE,OI.QUANTITY,I.TITLE
+    FROM ORDER_ITEM OI JOIN PRODUCT P on OI.ITEM_ID=P.ITEM_ID
+    JOIN ITEM I on OI.ITEM_ID = I.ITEM_ID
     WHERE ORDER_ID=:orderID`;
     var result=await database.simpleExecute(productSql,{orderID});
     var products=result.rows;
     var offerSql=`
-    SELECT OT.ITEM_ID,OT.QUANTITY,I.TITLE,I.PRICE
+    SELECT OT.ITEM_ID,OT.UNIT_PRICE,OT.QUANTITY,I.TITLE
     FROM ORDER_ITEM OT JOIN ITEM I on OT.ITEM_ID = I.ITEM_ID
     JOIN OFFER O on I.ITEM_ID = O.ITEM_ID
     WHERE ORDER_ID=:orderID`;
@@ -127,19 +125,26 @@ async function checkEnoughStock(orderItems) {
 
 async function calculateTotalPrice(orderItems,destinationSubDistrict){
     var price=0;
-    for(let i=0;i<orderItems.length;i++){
-        var item = (await database.simpleExecute(`SELECT TYPE FROM ITEM WHERE ITEM_ID=:itemID`, { itemID: orderItems[i].itemID })).rows[0];
+    var orderPrices=orderItems;
+    for(let i=0;i<orderPrices.length;i++){
+        var item = (await database.simpleExecute(`SELECT TYPE FROM ITEM WHERE ITEM_ID=:itemID`, { itemID: orderPrices[i].itemID })).rows[0];
         if(item.TYPE=='PRODUCT'){
-            var productUnitPrice=(await database.simpleExecute(`SELECT ROUND((I.PRICE-(I.PRICE*NVL(P.DISCOUNT,0))/100.0),2) PRICE
+            let result=await database.simpleExecute(`SELECT ROUND((I.PRICE-(I.PRICE*NVL(P.DISCOUNT,0))/100.0),2) PRICE,DISCOUNT
             FROM PRODUCT P JOIN ITEM I on P.ITEM_ID = I.ITEM_ID
-            WHERE P.ITEM_ID=:itemID`,{itemID:orderItems[i].itemID})).rows[0].PRICE;
-            price+=(productUnitPrice*orderItems[i].quantity);
+            WHERE P.ITEM_ID=:itemID`,{itemID:orderPrices[i].itemID});
+            var productUnitPrice=result.rows[0].PRICE;
+            var discount=result.rows[0].DISCOUNT;
+            price+=(productUnitPrice*orderPrices[i].quantity);
+            orderPrices[i].unitPrice=productUnitPrice;
+            orderPrices[i].discount=discount;
         }
         else{
             var offerPrice=( await database.simpleExecute(`SELECT ROUND(I.PRICE,2) PRICE
             FROM OFFER O JOIN ITEM I on O.ITEM_ID = I.ITEM_ID
-            WHERE I.ITEM_ID=:itemID`,{itemID:orderItems[i].itemID})).rows[0].PRICE;
+            WHERE I.ITEM_ID=:itemID`,{itemID:orderPrices[i].itemID})).rows[0].PRICE;
             price+=(offerPrice);
+            orderPrices[i].unitPrice=offerPrice;
+            orderPrices[i].discount=null;
         }     
     }
     // console.log(destinationSubDistrict);
@@ -147,23 +152,26 @@ async function calculateTotalPrice(orderItems,destinationSubDistrict){
     FROM SUB_DISTRICT SD JOIN
     DISTRICT D on SD.DISTRICT_ID = D.DISTRICT_ID
     WHERE SD.SUB_DISTRICT_ID=:destinationSubDistrict`,{destinationSubDistrict})).rows[0].DELIVERY_COST;
-    price+=deliveryCharge;
-    return price;
+    return {price,deliveryCharge,orderPrices};
 }
 async function placeOrder(orderItems,destinationAddress,orderDate,destinationSubDistrict,clientName) {
-    var totalPrice=await calculateTotalPrice(orderItems,destinationSubDistrict);
+    
+    var {price,deliveryCharge,orderPrices}=await calculateTotalPrice(orderItems,destinationSubDistrict);
     var orderStatus='PLACED';
-    var binds={totalPrice,destinationAddress,orderDate,orderStatus,destinationSubDistrict,clientName};
+    console.log('delivery Charge: '+deliveryCharge);
+    var binds={price,destinationAddress,orderDate,orderStatus,destinationSubDistrict,clientName,deliveryCharge};
     var result=await database.simpleExecute(`INSERT INTO "ORDER"(TOTAL_PRICE, DESTINATION_ADDRESS,
-    ORDER_DATE, ORDER_STATUS, DESTINATION_SUB_DISTRICT, CLIENT_NAME)
-    VALUES(:totalPrice,:destinationAddress,:orderDate,:orderStatus,:destinationSubDistrict,:clientName)`,
+    ORDER_DATE, ORDER_STATUS, DESTINATION_SUB_DISTRICT, CLIENT_NAME,DELIVERY_COST)
+    VALUES(:price,:destinationAddress,:orderDate,:orderStatus,:destinationSubDistrict,:clientName,:deliveryCharge)`,
     binds);
+    console.log('here');
     var lastRowID=result.lastRowid;
     var orderID=(await database.simpleExecute(`SELECT ORDER_ID FROM "ORDER" WHERE ROWID=:lastRowID`,{lastRowID})).rows[0].ORDER_ID;
-    for(let i=0;i<orderItems.length;i++){
-        let orderItemSql=`INSERT INTO ORDER_ITEM(ORDER_ID,ITEM_ID,QUANTITY)
-         VALUES(:orderID,:itemID,:quantity)`;
-         await database.simpleExecute(orderItemSql,{orderID,itemID:orderItems[i].itemID,quantity:orderItems[i].quantity});
+    for(let i=0;i<orderPrices.length;i++){
+        let orderItemSql=`INSERT INTO ORDER_ITEM(ORDER_ID,ITEM_ID,QUANTITY,UNIT_PRICE,DISCOUNT)
+         VALUES(:orderID,:itemID,:quantity,:unitPrice,:discount)`;
+         await database.simpleExecute(orderItemSql,{orderID,itemID:orderPrices[i].itemID,
+            quantity:orderPrices[i].quantity,unitPrice:orderPrices[i].unitPrice,discount:orderPrices[i].discount});
     }
     return orderID;
 }

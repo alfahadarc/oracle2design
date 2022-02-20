@@ -30,10 +30,23 @@
 // console.log(combined);
 
 
-var a=[{STATUS:'GOOD'},{STATUS:'BAD'},{STATUS:'GOOD'}];
-var passed=a.every(
-    (value)=>{
-        return value.STATUS=='GOOD';
+// var a=[{STATUS:'GOOD'},{STATUS:'BAD'},{STATUS:'GOOD'}];
+// var passed=a.every(
+//     (value)=>{
+//         return value.STATUS=='GOOD';
+//     }
+// );
+// console.log(passed);
+
+var start=Date.now();
+const SIZE=100;
+for(let i=0;i<SIZE;i++){
+    for(let j=0;j<SIZE;j++){
+        for(let k=0;k<SIZE;k++){
+
+        }
     }
-);
-console.log(passed);
+}
+var finish=Date.now();
+
+console.log((finish-start)/1000);

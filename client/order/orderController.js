@@ -18,13 +18,12 @@ async function placeOrder (req,res,next){
         var currentTime=Date.now();
         var offerExpired=await orderDBAPI.checkOfferExpired(orderItems,currentTime);
         if(offerExpired.hasExpired==true){
-            res.status(400).json(offerExpired);
+            res.status(400).json(message.error('Some of the offer is expired'));
             return;
         }
         var enoughStock=await orderDBAPI.checkEnoughStock(orderItems);
         if(enoughStock.hasEnough==false){
-            res.status(400).json({hasEnough:enoughStock.hasEnough,combined:enoughStock.combined,
-                refillProducts:enoughStock.refillProducts});
+            res.status(400).json(message.error('Not enough stock'));
             return;         
         }
         var orderID= await orderDBAPI.placeOrder(orderItems,destinationAddress,currentTime,destinationSubDistrict,clientName);

@@ -41,6 +41,8 @@ componentController.getProductComponents);
 
 
 
+
+
 /* TO-DO add validation and existence checks in controller*/
 router.put('/addProductToCart',authorize([role.Client]),cartController.addProductToCart);
 router.get('/cartProductQuantity',authorize([role.Client]),cartController.getProductQuantityInCart);
@@ -100,10 +102,9 @@ router.get('/getOrderItems',authorize([role.Client]),orderController.getOrderIte
 router.get('/getDistricts',locationController.getAllDistricts);
 router.get('/getSubDistricts',locationController.getAllSubdistricts);
 
-router.post('/test',(req,res,next)=>{
-    console.log(req.query);
-    console.log(req.body);
-    res.send('ok');
+router.get('/test',(req,res,next)=>{
+    var data=[{NAME:'Nahian',ID:124},{NAME:'Shabab',ID:145}];
+    res.status(200).json(data);
 });
 
 
