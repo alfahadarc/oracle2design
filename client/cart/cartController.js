@@ -30,7 +30,7 @@ async function getOfferQuantityInCart(req, res, next) {
       res.status(400).json(message.error("Offer does not exist"));
       return;
     }
-    var quantity = await cartDBAPI.getItemQuantityInCart(productID, username);
+    var quantity = await cartDBAPI.getItemQuantityInCart(offerID, username);
     res.status(200).json({ QUANTITY: quantity });
   } catch (error) {
     res.status(500).json(message.internalServerError());
@@ -66,6 +66,7 @@ async function addOfferToCart(req, res, next) {
     var username = req.username;
     var quantity = 1;
     var offer = await offerDBAPI.getOffer(offerID);
+    console.log(offerID);
     if (offer === null) {
       res.status(400).json(message.error("offer does not exist"));
       return;
@@ -75,7 +76,7 @@ async function addOfferToCart(req, res, next) {
     //   res.status(400).json(message.error("Stock Exceeded"));
     //   return;
     } else {
-      await cartDBAPI.updateItemQuantityToCart(offer, username, quantity);
+      await cartDBAPI.updateItemQuantityToCart(offerID, username, quantity);
       res.status(200).json(message.success("Added to Cart"));
     }
   } catch (error) {
