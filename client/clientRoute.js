@@ -47,6 +47,10 @@ componentController.getProductComponents);
 router.put('/addProductToCart',authorize([role.Client]),cartController.addProductToCart);
 router.get('/cartProductQuantity',authorize([role.Client]),cartController.getProductQuantityInCart);
 router.get('/getCartProducts',authorize([role.Client]),cartController.getCartProducts);
+router.put('/addOfferToCart',authorize([role.Client]),cartController.addOfferToCart);
+router.get('/cartOfferQuantity',authorize([role.Client]),cartController.getOfferQuantityInCart);
+
+
 router.get('/getFeaturedProducts',productController.getFeaturedProducts);
 router.get('/productTutorialVideo',productController.getTutorialVideo);
 

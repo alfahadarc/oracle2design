@@ -1,6 +1,7 @@
 const cartDBAPI = require("./cartDBAPI");
 const message = require("../../middleware/message");
 const productDBAPI = require("../product/productDBAPI");
+const offerDBAPI = require("../offer/offerDBAPI");
 
 async function getProductQuantityInCart(req, res, next) {
   try {
@@ -10,6 +11,23 @@ async function getProductQuantityInCart(req, res, next) {
     var productExists = await productDBAPI.productExists(productID);
     if (productExists == false) {
       res.status(400).json(message.error("Product does not exist"));
+      return;
+    }
+    var quantity = await cartDBAPI.getItemQuantityInCart(productID, username);
+    res.status(200).json({ QUANTITY: quantity });
+  } catch (error) {
+    res.status(500).json(message.internalServerError());
+  }
+}
+
+async function getOfferQuantityInCart(req, res, next) {
+  try {
+    var offerID = req.query.offerID;
+    var username = req.username;
+    // var quantity=req.body.quantity;
+    var offerExists = await offerDBAPI.offerExists(offerID);
+    if (offerExists == false) {
+      res.status(400).json(message.error("Offer does not exist"));
       return;
     }
     var quantity = await cartDBAPI.getItemQuantityInCart(productID, username);
@@ -41,10 +59,36 @@ async function addProductToCart(req, res, next) {
   }
 }
 
+
+async function addOfferToCart(req, res, next) {
+  try {
+    var offerID = req.body.offerID;
+    var username = req.username;
+    var quantity = 1;
+    var offer = await offerDBAPI.getOffer(offerID);
+    if (offer === null) {
+      res.status(400).json(message.error("offer does not exist"));
+      return;
+      //To-do check offer expire+stock
+    // } else if (offer.STOCK < quantity) {
+    //   //cannot add product
+    //   res.status(400).json(message.error("Stock Exceeded"));
+    //   return;
+    } else {
+      await cartDBAPI.updateItemQuantityToCart(offer, username, quantity);
+      res.status(200).json(message.success("Added to Cart"));
+    }
+  } catch (error) {
+    res.status(500).json(message.internalServerError());
+  }
+}
+
+
+
 async function getCartProducts(req, res, next) {
   try {
     var username = req.username;
-    var cart = await cartDBAPI.getCartProducts(username);
+    var cart = await cartDBAPI.getCartItems(username);
     res.status(200).json(cart);
   } catch (error) {
     res.status(500).json(message.internalServerError());
@@ -67,5 +111,7 @@ module.exports = {
   getProductQuantityInCart,
   addProductToCart,
   getCartProducts,
-  deleteItemFromCart
+  deleteItemFromCart,
+  getOfferQuantityInCart,
+  addOfferToCart
 };

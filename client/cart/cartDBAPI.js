@@ -27,9 +27,9 @@ async function updateItemQuantityToCart(itemID, clientName, quantity) {
   return currentQuantity;
 }
 
-async function getCartProducts(clientName) {
+async function getCartItems(clientName) {
   var binds = { clientName };
-  var sql = `SELECT I.TITLE,CC.QUANTITY,CC.ITEM_ID
+  var sql = `SELECT I.TITLE,I.TYPE,CC.QUANTITY,CC.ITEM_ID
   FROM CLIENT_CART CC JOIN ITEM I on CC.ITEM_ID = I.ITEM_ID
   WHERE CC.CLIENT_NAME=:clientName`;
   var result = await database.simpleExecute(sql, binds);
@@ -45,6 +45,6 @@ async function deleteItemFromCart(clientName,itemID){
 module.exports = {
   getItemQuantityInCart,
   updateItemQuantityToCart,
-  getCartProducts,
+  getCartItems,
   deleteItemFromCart
 };
