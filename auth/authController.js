@@ -1,11 +1,11 @@
 require("dotenv").config();
-const message=require('../middleware/message');
+const message = require("../middleware/message");
 const secret = process.env.SECRET;
 
 const jwt = require("jsonwebtoken");
 const authDBApi = require("./authDBAPI");
-
-
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 module.exports = {
   authenticate,
@@ -14,43 +14,75 @@ module.exports = {
   logout,
 };
 
-function authenticate(req, res, next) {
-  authenticateUser(req.body)
-    .then((user) => {
-      if (user != null) {
-        res.json(user);
-      } else {
-        res.status(400).json(message.error('Username or Password is Incorrect'));
-      }
-    })
-    .catch((err) => res.status(500).json(message.internalServerError()));
+async function authenticate(req, res, next) {
+  await test(req.body.username, req.body.password).then((user) => {
+    console.log(user);
+  });
+
+  // authenticateUser(req.body)
+  //   .then((user) => {
+  //     if (user != null) {
+  //       res.json(user);
+  //     } else {
+  //       res.status(400).json(message.error('Username or Password is Incorrect'));
+  //     }
+  //   })
+  //   .catch((err) => res.status(500).json(message.internalServerError()));
 }
 
-async function authenticateUser({ username, password }) {
-  try {
-    let credentials = {};
-    credentials.username = username;
-    credentials.password = password;
-    const rows = await authDBApi.login(credentials); // [] or admin
+// async function authenticateUser({ username, password }) {
+//   try {
+//     let credentials = {};
+//     credentials.username = username;
+//     credentials.password = password;
+//     const rows = await authDBApi.login(credentials); // [] or admin
 
-    //admin
-    if (rows.length > 0) {
-      const user = rows[0];
-      const token = jwt.sign(
-        {
-          username: user.USER_NAME,
-          role: user.USER_ROLE,
-        },
-        secret,
-        { expiresIn: "2 days" }
-      );
+//     //admin
+//     if (rows.length > 0) {
+//       const user = rows[0];
+//       const token = jwt.sign(
+//         {
+//           username: user.USER_NAME,
+//           role: user.USER_ROLE,
+//         },
+//         secret,
+//         { expiresIn: "2 days" }
+//       );
 
-      user.token = token;
-      return user;
-    } else {
-      return null;
-    }
-  } finally {
+//       user.token = token;
+//       return user;
+//     } else {
+//       return null;
+//     }
+//   } finally {
+//   }
+// }
+
+async function test(username, password) {
+  var user = null;
+  const rows = await authDBApi.getPassword(username);
+  if (rows.length > 0) {
+    let dbpassword = rows[0].PASSWORD;
+    bcrypt.compare(password, dbpassword, function (err, res) {
+      if (res == true) {
+        user = rows[0];
+        const token = jwt.sign(
+          {
+            username: user.USER_NAME,
+            role: user.USER_ROLE,
+          },
+          secret,
+          { expiresIn: "2 days" }
+        );
+
+        user.token = token;
+        return user;
+      } else {
+        return user;
+      }
+    });
+  } else {
+    return user; //err not found
   }
 }
 
