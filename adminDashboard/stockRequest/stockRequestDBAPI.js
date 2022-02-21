@@ -15,11 +15,11 @@ async function getStockRequest(productID){
     return null;
 }
 
-async function resolveStockRequest(productID){
+async function resolveStockRequest(productID,quantity){
     var stockRequest=await getStockRequest(productID);
     await database.simpleExecute(`UPDATE PRODUCT SET STOCK=(STOCK+:quantity) 
     WHERE ITEM_ID=:productID`
-    ,{quantity:stockRequest.QUANTITY,productID});
+    ,{quantity,productID});
     await database.simpleExecute(`DELETE FROM STOCK_REQUEST 
     WHERE PRODUCT_ID=:productID`,{productID});
 }

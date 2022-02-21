@@ -16,12 +16,13 @@ async function getStockRequests(req,res,next){
 async function resolveStockRequest (req,res,next){
     try{
         var productID=req.query.productID;
+        var quantity=req.body.quantity;
         var stockRequest=await stockRequestDBAPI.getStockRequest(productID);
         if(stockRequest==null){
             res.status(400).json(message.error('Stock request does not exist'));
             return;
         }
-        await stockRequestDBAPI.resolveStockRequest(productID);
+        await stockRequestDBAPI.resolveStockRequest(productID,quantity);
         res.status(200).json(message.success('Stock Request Resolved'));
     }catch(err){
         console.log(err);

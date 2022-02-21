@@ -17,7 +17,7 @@ async function getStockRequest(req,res,next){
         var productID=req.query.productID;
         var stockRequest=await stockRequestDBAPI.getStockRequest(productID);
         if(stockRequest==null){
-            res.status(200).json(message.error('This product does not have a stock request'));
+            res.status(200).json(false);
             return;
         }
         res.status(200).json(stockRequest);
