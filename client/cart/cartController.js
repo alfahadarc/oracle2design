@@ -47,9 +47,8 @@ async function addProductToCart(req, res, next) {
       res.status(400).json(message.error("Product does not exist"));
       return;
     } else if (product.STOCK < quantity) {
-      //cannot add product
-      res.status(400).json(message.error("Stock Exceeded"));
-      return;
+      await cartDBAPI.updateItemQuantityToCart(productID, username, quantity);
+      res.status(200).json(message.success("Pre-Ordered"));
     } else {
       await cartDBAPI.updateItemQuantityToCart(productID, username, quantity);
       res.status(200).json(message.success("Added to Cart"));
@@ -62,6 +61,7 @@ async function addProductToCart(req, res, next) {
 
 async function addOfferToCart(req, res, next) {
   try {
+    var currentTime=Date.now();
     var offerID = req.body.offerID;
     var username = req.username;
     var quantity = 1;
@@ -75,7 +75,12 @@ async function addOfferToCart(req, res, next) {
     //   //cannot add product
     //   res.status(400).json(message.error("Stock Exceeded"));
     //   return;
-    } else {
+    }
+    else if(offer.EXPIRE_DATE<currentTime){
+      res.status(400).json(message.error("offer Expired"));
+      return;
+    } 
+    else {
       await cartDBAPI.updateItemQuantityToCart(offerID, username, quantity);
       res.status(200).json(message.success("Added to Cart"));
     }

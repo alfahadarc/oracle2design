@@ -21,22 +21,22 @@ async function assembleOrder(req,res,next){
             res.status(400).json(message.error('Invalid Order'));
             return;
         }
-        var higherPriorityExist=orders.some(
-            (value)=>{
-                return value.ORDER_DATE<order.ORDER_DATE;
-            }
-        );
-        if(higherPriorityExist==true){
-            res.status(400).json(message.error('Assemble Higher Priority Order First'));
-            return;
-        }
+        // var higherPriorityExist=orders.some(
+        //     (value)=>{
+        //         return value.ORDER_DATE<order.ORDER_DATE;
+        //     }
+        // );
+        // if(higherPriorityExist==true){
+        //     res.status(400).json(message.error('Assemble Higher Priority Order First'));
+        //     return;
+        // }
         var {hasEnough,combined,refillProducts}=await orderDBAPI.checkEnoughStock(orderID);
         if(hasEnough==false){
-            res.status(400).json({hasEnough,combined,refillProducts});
+            res.status(200).json({hasEnough,combined,refillProducts});
             return;
         }
         await orderDBAPI.assembleOrder(orderID);
-        res.status(200).json(message.success('Order Assembled'));
+        res.status(200).json({hasEnough});
     }catch(err){
         console.log(err);
         res.status(500).json(message.internalServerError());

@@ -21,11 +21,11 @@ async function placeOrder (req,res,next){
             res.status(400).json(message.error('Some of the offer is expired'));
             return;
         }
-        var enoughStock=await orderDBAPI.checkEnoughStock(orderItems);
-        if(enoughStock.hasEnough==false){
-            res.status(400).json(message.error('Not enough stock'));
-            return;         
-        }
+        // var enoughStock=await orderDBAPI.checkEnoughStock(orderItems);
+        // if(enoughStock.hasEnough==false){
+        //     res.status(400).json(message.error('Not enough stock'));
+        //     return;         
+        // }
         var orderID= await orderDBAPI.placeOrder(orderItems,destinationAddress,currentTime,destinationSubDistrict,clientName);
         res.status(200).json({ORDER_ID:orderID});
     }catch(err){
@@ -57,7 +57,7 @@ async function confirmPayment(req,res,next){
         await orderDBAPI.confirmPayment(orderID,currentTime);
         res.status(200).json(message.success('Order Confirmed!'));
     }catch(error){
-        console.log(err);
+        console.log(error);
         res.status(500).json(message.internalServerError());
     }
 }
