@@ -26,6 +26,7 @@ const role = require("../middleware/role");
 const {body,validationResult}=require('express-validator');
 const ValidationHandler=require('../middleware/validationHandler');
 const assemblerRoute=require('../assembler/assemblerRoute');
+const deliveryManRoute=require('../deliveryMan/deliveryManRoute');
 
 // router.use("/country", countryRoute);
 
@@ -34,7 +35,7 @@ router.use("/auth", authRoute);
 router.use("/admindashboard",authorize([role.Admin]),admindashboardRoute);
 router.use('/client',require('../client/clientRoute'));
 router.use('/assembler',authorize([role.Assesmbler]),assemblerRoute);
-
+router.use('/deliveryMan',authorize([role.DeliveryMan]),deliveryManRoute);
 
 router.get('/test',
 body('discount').optional({nullable:true}).isInt(),

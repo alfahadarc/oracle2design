@@ -31,8 +31,8 @@ async function getOrderItems(orderID){
     JOIN OFFER O on I.ITEM_ID = O.ITEM_ID
     WHERE ORDER_ID=:orderID`;
     result=await database.simpleExecute(offerSql,{orderID});
-    var orders=result.rows;
-    return {products,orders};
+    var offers=result.rows;
+    return {products,offers};
 }
 
 async function checkOfferExpired(orderItems,currentTime) {

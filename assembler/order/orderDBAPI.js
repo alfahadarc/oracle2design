@@ -2,7 +2,6 @@ const database = require('../../services/database');
 const offerDBAPI=require('../../client/offer/offerDBAPI');
 
 
-
 async function getAllPendingOrders(){
     var sql=`SELECT * FROM "ORDER"
     WHERE ORDER_STATUS='PAY_CONFIRMED'
@@ -33,12 +32,10 @@ async function checkEnoughStock(orderID){
     var hasEnough = true;
     var refillProducts = [];
     var combined = [];
-    // console.log(orderItems);
     for (let i = 0; i < orderItems.length; i++) {
         var orderItem = orderItems[i];
         var item = (await database.simpleExecute(`SELECT TYPE FROM ITEM WHERE ITEM_ID=:itemID`, { itemID: orderItem.ITEM_ID })).rows[0];
         if (item.TYPE == 'PRODUCT') {
-            // console.log('hereee');
             let cmbIdx=combined.findIndex(
                 (value)=>{
                     return value.itemID==orderItem.ITEM_ID;
@@ -52,11 +49,8 @@ async function checkEnoughStock(orderID){
             }
         }
         else {
-            // console.log('hereee');
             var products = await offerDBAPI.getOfferProducts(orderItem.ITEM_ID);
             var freeProducts = await offerDBAPI.getOfferFreeProducts(orderItem.ITEM_ID);
-            // console.log(products);
-            // console.log(freeProducts);
             products.forEach((value, index, array) => {
                 let cmbIdx=combined.findIndex(
                     (v)=>{
@@ -96,9 +90,52 @@ async function checkEnoughStock(orderID){
     return {hasEnough,combined,refillProducts};
 }
 
-async function assembleOrder(orderID){
 
+//This is done with autocommit off, so either all of them gets executed in database, or none of them does;
+// In this way, it is ensured either the order is assembled with all the stocks decreased, or none at all.
+//no middle ground
+async function assembleOrder(orderID){
+    
+    var orderItems=await getOrderItems(orderID);
+    var connection=await database.getConnection();
+    try{
+        for(let i=0;i<orderItems.length;i++){
+            var orderItem=orderItems[i];
+            if(orderItem.TYPE=='PRODUCT'){
+                await connection.execute(`UPDATE PRODUCT
+                SET STOCK=(STOCK-:quantity)
+                WHERE ITEM_ID=:itemID
+                `,{quantity:orderItem.QUANTITY,itemID:orderItem.ITEM_ID});
+            }
+            else{
+                var products=await offerDBAPI.getOfferProducts(orderItem.ITEM_ID);
+                var freeProducts=await offerDBAPI.getOfferFreeProducts(orderItem.ITEM_ID);
+                for(let i=0;i<products.length;i++){
+                    var product=products[i];
+                    await connection.execute(`
+                    UPDATE PRODUCT SET STOCK=(STOCK-:quantity)
+                    WHERE ITEM_ID=:itemID
+                    `,{quantity:product.COUNT,itemID:product.PRODUCT_ID});
+                }
+                for(let i=0;i<freeProducts.length;i++){
+                    var freeProduct=freeProducts[i];
+                    await connection.execute(`
+                    UPDATE PRODUCT SET STOCK=(STOCK-:quantity)
+                    WHERE ITEM_ID=:itemID
+                    `,{quantity:freeProduct.COUNT,itemID:freeProduct.PRODUCT_ID});
+                }
+            }
+        }
+        await connection.execute(`UPDATE "ORDER" SET ORDER_STATUS='ASSEMBLED' WHERE ORDER_ID=:orderID`,{orderID});
+        await connection.commit();
+    }catch(err){
+        console.log(err);
+        console.log('herrre at order asse');
+        await connection.rollback();
+        await connection.close();
+        throw err;
+    }
 }
 
 
-module.exports={getAllPendingOrders,getOrder,checkEnoughStock};
+module.exports={getAllPendingOrders,getOrder,checkEnoughStock,assembleOrder};

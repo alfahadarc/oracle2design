@@ -30,7 +30,13 @@ async function assembleOrder(req,res,next){
             res.status(400).json(message.error('Assemble Higher Priority Order First'));
             return;
         }
-        res.status(200).json(message.success('ok'));
+        var {hasEnough,combined,refillProducts}=await orderDBAPI.checkEnoughStock(orderID);
+        if(hasEnough==false){
+            res.status(400).json({hasEnough,combined,refillProducts});
+            return;
+        }
+        await orderDBAPI.assembleOrder(orderID);
+        res.status(200).json(message.success('Order Assembled'));
     }catch(err){
         console.log(err);
         res.status(500).json(message.internalServerError());

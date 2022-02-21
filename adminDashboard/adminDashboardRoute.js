@@ -10,8 +10,7 @@ const validationHandler=require('../middleware/validationHandler');
 const message=require('../middleware/message');
 const componentController=require('./component/componentController');
 const offerController=require('./offer/offerController');
-const res = require("express/lib/response");
-
+const stockRequestController=require('./stockRequest/stockRequestController');
 const router = express.Router();
 
 module.exports=router;
@@ -199,3 +198,6 @@ router.post('/uploadOfferImage',offerController.uploadOfferImageMulter.single('o
 
 router.get('/offerMainImage',offerController.getOfferMainImage);
 
+router.get('/getStockRequests',stockRequestController.getStockRequests);
+router.put('/resolveStockRequest',stockRequestController.resolveStockRequest);
+router.put('/rejectStockRequest',stockRequestController.rejectStockRequest);

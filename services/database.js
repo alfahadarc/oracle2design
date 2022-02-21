@@ -12,6 +12,14 @@ async function close() {
   await oracledb.getPool().close(0);
 }
 
+async function getConnection(){
+  var connection=await oracledb.getConnection();
+  return connection;
+}
+
+module.exports.getConnection=getConnection;
+// module.exports.oracledbObject=oracledb.OBJECT;
+
 module.exports.close = close;
 
 async function simpleExecute(statement, binds = [], opts = {}) {
@@ -39,5 +47,6 @@ async function simpleExecute(statement, binds = [], opts = {}) {
     }
   }
 }
+
 
 module.exports.simpleExecute = simpleExecute;
