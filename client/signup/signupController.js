@@ -21,7 +21,8 @@ function addClient(req, res, next) {
 }
 async function add(req, res, next) {
   try {
-    var { userName, password, email, firstName, lastName } = req.body;
+    var { userName, password, email, firstName, lastName, phoneNumber } =
+      req.body;
 
     //console.log(userName, password, email, firstName, lastName);
 
@@ -32,7 +33,14 @@ async function add(req, res, next) {
       res.status(400).json(message.error("email is taken"));
       return;
     }
-    await signupDBAPI.addClient(userName, password, email, firstName, lastName);
+    await signupDBAPI.addClient(
+      userName,
+      password,
+      email,
+      firstName,
+      lastName,
+      phoneNumber
+    );
     res.status(200).json(message.success("Successfully Signed Up"));
   } catch (error) {
     res.status(500).json(message.internalServerError());
