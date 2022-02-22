@@ -94,6 +94,7 @@ router.get('/getAllNotifications',authorize([role.Client]),notificationControlle
 router.get('/getUnseenNotificationCount',authorize([role.Client]),notificationController.getUnseenNotificationCount);
 router.delete('/deleteNotification',authorize([role.Client]),notificationController.deleteNotification);
 router.put('/setNotificationAsSeen',authorize([role.Client]),notificationController.setNotificationAsSeen);
+router.get('/getProductIDFromNotification',authorize([role.Client]),notificationController.getProductIDFromNotification);
 
 
 
