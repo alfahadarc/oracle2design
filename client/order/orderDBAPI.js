@@ -192,5 +192,23 @@ async function cancelOrder(orderID){
     await database.simpleExecute(`DELETE FROM "ORDER" WHERE ORDER_ID=:orderID`,{orderID});
 }
 
+async function getRewardPoints(clientName){
+    var result=await database.simpleExecute(`SELECT REWARD_POINTS FROM CLIENT WHERE USER_NAME=:clientName`
+    ,{clientName});
+    return result.rows[0].REWARD_POINTS;
+}
+async function redeemOrderPrice(orderID,decreasedPrice){
+    await database.simpleExecute(`UPDATE "ORDER"
+    SET TOTAL_PRICE=:decreasedPrice,HAS_REDEEMED=1
+    WHERE ORDER_ID=:orderID`,{decreasedPrice,orderID});
+}
+async function spendRewardPoints(clientName,rewardPoints){
+    console.log("inside spend reward points: "+rewardPoints);
+    await database.simpleExecute(`UPDATE CLIENT
+    SET CLIENT.REWARD_POINTS=(CLIENT.REWARD_POINTS-:rewardPoints)
+    WHERE USER_NAME=:clientName`,{rewardPoints,clientName});
+}
+
 module.exports = { checkEnoughStock, checkOfferExpired,placeOrder,
-calculateTotalPrice,confirmPayment,getOrders,getOrder,cancelOrder,getOrderItems,deleteCart};
+calculateTotalPrice,confirmPayment,getOrders,getOrder,cancelOrder,getOrderItems,deleteCart,
+getRewardPoints,spendRewardPoints,redeemOrderPrice};

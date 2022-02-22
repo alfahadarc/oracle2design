@@ -37,7 +37,8 @@ async function placeOrder (req,res,next){
 async function confirmPayment(req,res,next){
     try{
         var clientName=req.username;
-        var {orderID,paidAmount}=req.body;
+        var {orderID,paidAmount,rewardPoints,isRedeeming}=req.body;
+        // console.log(rewardPoints);
         var currentTime=Date.now();
         var order=await orderDBAPI.getOrder(orderID);
         if(order==null){
@@ -45,12 +46,25 @@ async function confirmPayment(req,res,next){
             return;
         }
         if(order.ORDER_STATUS!='PLACED'){
-            res.status(400).json(message.error('invalid request'));
+            res.status(400).json(message.error('Invalid'));
             return;
         }
-        if(order.TOTAL_PRICE!=paidAmount){
-            console.log(order.TOTAL_PRICE);
-            console.log(paidAmount);
+        if(isRedeeming){
+            var {canRedeem,errorMessage}=await canRedeemOrder(clientName,orderID,rewardPoints);
+            if(canRedeem==true){
+                console.log("Reward points:"+rewardPoints);
+                await orderDBAPI.redeemOrderPrice(orderID,order.TOTAL_PRICE-(rewardPoints/100));
+                await orderDBAPI.spendRewardPoints(clientName,rewardPoints);
+                order=await orderDBAPI.getOrder(orderID);
+            }
+            else{
+                res.status(400).json(message.error(errorMessage));
+                return;
+            }
+        }
+        if((order.TOTAL_PRICE+order.DELIVERY_COST)!=paidAmount){
+            // console.log(order.TOTAL_PRICE);
+            // console.log(paidAmount);
             res.status(400).json(message.error('Invalid Payment'));
             return;
         }
@@ -140,6 +154,45 @@ async function getOrders(req,res,next){
         console.log(err);
         res.status(500).json(message.internalServerError());
     }
+}
+
+async function canRedeemOrder(clientName,orderID,rewardPoints){
+    var order=await orderDBAPI.getOrder(orderID);
+    var errorMessage='';
+    var canRedeem=true;
+    if(order==null){
+        message='Order does not exist';
+        canRedeem=false;
+    }
+    if(order.HAS_REDEEMED==1){
+        errorMessage='already redeemed';
+        canRedeem=false;
+    }
+    if(order.CLIENT_NAME!==clientName){
+        errorMessage='not your order';
+        canRedeem=false;
+    }
+    if(order.ORDER_STATUS!='PLACED'){
+        errorMessage='invalid request';
+        canRedeem=false;
+    }
+    var clientRewardPoints=await orderDBAPI.getRewardPoints(clientName);
+    if(clientRewardPoints<rewardPoints){
+        errorMessage='Invalid reward points';
+        canRedeem=false;
+    }
+    var convertedRewardAmount=rewardPoints/100;
+    if(convertedRewardAmount>(order.TOTAL_PRICE/2)){
+        errorMessage='Redeem amount cannot be more than 50% of price';
+        canRedeem=false;
+    }
+    if(rewardPoints<=0){
+        errorMessage='Redeem amount cannot be zero';
+        canRedeem=false;
+    }
+    // await orderDBAPI.redeemOrderPrice(orderID,order.TOTAL_PRICE-convertedRewardAmount);
+    // await orderDBAPI.spendRewardPoints(rewardPoints);
+    return {canRedeem,errorMessage};
 }
 
 

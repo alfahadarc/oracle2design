@@ -38,15 +38,17 @@
 // );
 // console.log(passed);
 
-var start=Date.now();
-const SIZE=100;
-for(let i=0;i<SIZE;i++){
-    for(let j=0;j<SIZE;j++){
-        for(let k=0;k<SIZE;k++){
+// var start=Date.now();
+// const SIZE=100;
+// for(let i=0;i<SIZE;i++){
+//     for(let j=0;j<SIZE;j++){
+//         for(let k=0;k<SIZE;k++){
 
-        }
-    }
-}
-var finish=Date.now();
+//         }
+//     }
+// }
+// var finish=Date.now();
 
-console.log((finish-start)/1000);
+// console.log((finish-start)/1000);
+var total_price=153.34;
+console.log(Math.floor(((total_price/2)*100)));
