@@ -36,6 +36,7 @@ async function placeOrder (req,res,next){
 
 async function confirmPayment(req,res,next){
     try{
+        var clientName=req.username;
         var {orderID,paidAmount}=req.body;
         var currentTime=Date.now();
         var order=await orderDBAPI.getOrder(orderID);
@@ -55,6 +56,7 @@ async function confirmPayment(req,res,next){
         }
         
         await orderDBAPI.confirmPayment(orderID,currentTime);
+        await orderDBAPI.deleteCart(clientName);
         res.status(200).json(message.success('Order Confirmed!'));
     }catch(error){
         console.log(error);

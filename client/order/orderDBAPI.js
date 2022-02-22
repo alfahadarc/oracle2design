@@ -164,7 +164,7 @@ async function placeOrder(orderItems,destinationAddress,orderDate,destinationSub
     ORDER_DATE, ORDER_STATUS, DESTINATION_SUB_DISTRICT, CLIENT_NAME,DELIVERY_COST)
     VALUES(:price,:destinationAddress,:orderDate,:orderStatus,:destinationSubDistrict,:clientName,:deliveryCharge)`,
     binds);
-    console.log('here');
+    // console.log('here');
     var lastRowID=result.lastRowid;
     var orderID=(await database.simpleExecute(`SELECT ORDER_ID FROM "ORDER" WHERE ROWID=:lastRowID`,{lastRowID})).rows[0].ORDER_ID;
     for(let i=0;i<orderPrices.length;i++){
@@ -183,10 +183,14 @@ async function confirmPayment(orderID,paymentDate){
     await database.simpleExecute(sql,{orderStatus,paymentDate,orderID});
 }
 
+async function deleteCart(clientName){
+    await database.simpleExecute(`DELETE FROM CLIENT_CART WHERE CLIENT_NAME=:clientName`,{clientName});
+}
+
 
 async function cancelOrder(orderID){
     await database.simpleExecute(`DELETE FROM "ORDER" WHERE ORDER_ID=:orderID`,{orderID});
 }
 
 module.exports = { checkEnoughStock, checkOfferExpired,placeOrder,
-calculateTotalPrice,confirmPayment,getOrders,getOrder,cancelOrder,getOrderItems};
+calculateTotalPrice,confirmPayment,getOrders,getOrder,cancelOrder,getOrderItems,deleteCart};
