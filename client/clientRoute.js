@@ -18,6 +18,7 @@ const wishlistController=require('./wishlist/wishlistController');
 const notificationController=require('./notification/notificationController');
 const orderController=require('./order/orderController');
 const locationController=require('./location/locationController');
+const achievementController=require('./achievement/achievementController');
 
 router.get('/getCategoryProducts',
 query('categoryID').exists().isInt(),
@@ -105,6 +106,11 @@ router.get('/getOrderItems',authorize([role.Client]),orderController.getOrderIte
 
 router.get('/getDistricts',locationController.getAllDistricts);
 router.get('/getSubDistricts',locationController.getAllSubdistricts);
+
+
+router.get('/getAchievements',authorize([role.Client]),achievementController.getAllAchievements);
+router.get('/getRewardPoints',authorize([role.Client]),achievementController.getRewardPoints);
+router.put('/claimAchievement',authorize([role.Client]),achievementController.claimAchievement);
 
 router.get('/test',(req,res,next)=>{
     var data=[{NAME:'Nahian',ID:124},{NAME:'Shabab',ID:145}];
