@@ -12,6 +12,17 @@ async function getAllPendingOrders(req,res,next){
     }
 }
 
+async function getOrderItems(req,res,next){
+    try{
+        var orderID=req.query.orderID;
+        var orderItems=await orderDBAPI.getOrderItems(orderID);
+        res.status(200).json(orderItems);
+    }catch(err){
+        console.log(err);
+        res.status(500).json(message.internalServerError());
+    }
+}
+
 async function assembleOrder(req,res,next){
     try{
         var orderID=req.query.orderID;
@@ -44,4 +55,4 @@ async function assembleOrder(req,res,next){
     }
 }
 
-module.exports={getAllPendingOrders,assembleOrder};
+module.exports={getAllPendingOrders,assembleOrder,getOrderItems};

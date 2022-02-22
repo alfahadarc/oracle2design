@@ -21,7 +21,8 @@ async function getOrder(orderID){
 async function getOrderItems(orderID){
     var sql=`SELECT OI.ORDER_ID,I.TYPE,OI.QUANTITY,I.ITEM_ID,I.TITLE
     FROM ORDER_ITEM OI JOIN ITEM I on OI.ITEM_ID = I.ITEM_ID
-    WHERE OI.ORDER_ID=:orderID`;
+    JOIN "ORDER" O ON OI.ORDER_ID= O.ORDER_ID
+    WHERE OI.ORDER_ID=:orderID AND ORDER_STATUS='PAY_CONFIRMED'`;
     var result=await database.simpleExecute(sql,{orderID});
     return result.rows;
 }
@@ -139,4 +140,4 @@ async function assembleOrder(orderID,assemblerName){
 }
 
 
-module.exports={getAllPendingOrders,getOrder,checkEnoughStock,assembleOrder};
+module.exports={getAllPendingOrders,getOrder,checkEnoughStock,assembleOrder,getOrderItems};

@@ -52,7 +52,10 @@ async function confirmPayment(req,res,next){
         if(isRedeeming){
             var {canRedeem,errorMessage}=await canRedeemOrder(clientName,orderID,rewardPoints);
             if(canRedeem==true){
-                console.log("Reward points:"+rewardPoints);
+                if((order.TOTAL_PRICE-(rewardPoints/100)+order.DELIVERY_COST)!=paidAmount){
+                    res.status(400).json(message.error('Invalid Payment'));
+                    return;
+                }
                 await orderDBAPI.redeemOrderPrice(orderID,order.TOTAL_PRICE-(rewardPoints/100));
                 await orderDBAPI.spendRewardPoints(clientName,rewardPoints);
                 order=await orderDBAPI.getOrder(orderID);
