@@ -24,7 +24,7 @@ async function add(req, res, next) {
     var { userName, password, email, firstName, lastName, phoneNumber } =
       req.body;
 
-    //console.log(userName, password, email, firstName, lastName);
+    //console.log(userName, password, email, firstName, lastName, phoneNumber);
 
     if ((await signupDBAPI.userNameExists(userName)) == true) {
       res.status(400).json(message.error("Username is taken"));
