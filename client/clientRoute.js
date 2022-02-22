@@ -19,6 +19,7 @@ const notificationController=require('./notification/notificationController');
 const orderController=require('./order/orderController');
 const locationController=require('./location/locationController');
 const achievementController=require('./achievement/achievementController');
+const profileController=require('./profile/profileController');
 
 router.get('/getCategoryProducts',
 query('categoryID').exists().isInt(),
