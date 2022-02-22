@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const {query,body,check,validationResult}=require('express-validator');
-const validationHandler=require('../middleware/validationHandler');
-const productController=require('./product/productController');
-const categoryController=require('./category/categoryController');
-const componentController=require('./component/componentController');
+const { query, body, check, validationResult } = require("express-validator");
+const validationHandler = require("../middleware/validationHandler");
+const productController = require("./product/productController");
+const categoryController = require("./category/categoryController");
+const componentController = require("./component/componentController");
 const { authorize } = require("../middleware/authJWT");
 const role=require('../middleware/role');
 const cartController=require('./cart/cartController');
@@ -117,8 +117,16 @@ router.get('/test',(req,res,next)=>{
     res.status(200).json(data);
 });
 
+router.get(
+  "/getprofile",
+  authorize([role.Client]),
+  profileController.getProfile
+);
 
+router.put(
+  "/updateProfile",
+  authorize([role.Client]),
+  profileController.updateProfile
+);
 
-
-
-module.exports=router;
+module.exports = router;
