@@ -88,14 +88,6 @@ router.post(
       return Promise.reject();
     }),
   validationHandler(validationResult, "Featured or Continued Flag is Invalid"),
-  body("discount")
-    .optional({ nullable: true })
-    .isInt()
-    .custom((value) => {
-      if (value > 100 || value < 0) return Promise.reject();
-      return true;
-    }),
-  validationHandler(validationResult, "Invalid discount"),
   body("discountExpireDate").optional({ nullable: true }).isInt(),
   validationHandler(validationResult, "Invalid Discount Expire Date"),
   body("category", "manufacturer").exists().isInt(),
