@@ -27,4 +27,13 @@ async function setNotificationAsSeen(userName,notificationID){
     await database.simpleExecute(sql,{userName,notificationID});
 }
 
-module.exports={getAllNotifications,deleteNotification,setNotificationAsSeen,getUnseenNotificationCount};
+async function getProductIDFromNotification(notificationID){
+    var result=await database.simpleExecute(`SELECT PRODUCT_ID FROM COMMENT_NOTIFY WHERE
+    NOTIFICATION_ID=:notificationID`,{notificationID});
+    if(result.rows.length>0)
+        return result.rows[0].PRODUCT_ID;
+    return null;
+}
+
+module.exports={getAllNotifications,deleteNotification,setNotificationAsSeen,getUnseenNotificationCount,
+getProductIDFromNotification};

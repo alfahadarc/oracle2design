@@ -43,4 +43,19 @@ async function setNotificationAsSeen(req,res,next){
     }
 }
 
-module.exports={getAllNotifications,setNotificationAsSeen,deleteNotification,getUnseenNotificationCount};
+async function getProductIDFromNotification(req,res,next){
+    try{
+        var notificationID=req.query.notificationID;
+        var productID=await notificationDBAPI.getProductIDFromNotification(notificationID);
+        if(productID==null){
+            res.status(400).json(message.error('Invalid notification request'));
+            return;
+        }
+        res.status(200).json({PRODUCT_ID:productID});
+    }catch(error){
+        res.status(500).json(message.internalServerError());
+    }
+}
+
+module.exports={getAllNotifications,setNotificationAsSeen,deleteNotification,getUnseenNotificationCount,
+getProductIDFromNotification};

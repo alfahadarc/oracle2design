@@ -12,10 +12,22 @@ async function getAllPendingOrders(req,res,next){
     }
 }
 
+async function getOrderItems(req,res,next){
+    try{
+        var orderID=req.query.orderID;
+        var orderItems=await orderDBAPI.getOrderItems(orderID);
+        res.status(200).json(orderItems);
+    }catch(err){
+        console.log(err);
+        res.status(500).json(message.internalServerError());
+    }
+}
+
 async function assembleOrder(req,res,next){
     try{
         var orderID=req.query.orderID;
-        var orders=await orderDBAPI.getAllPendingOrders();
+        // var orders=await orderDBAPI.getAllPendingOrders();
+        var assemblerName=req.username;
         var order=await orderDBAPI.getOrder(orderID);
         if(order==null){
             res.status(400).json(message.error('Invalid Order'));
@@ -35,7 +47,7 @@ async function assembleOrder(req,res,next){
             res.status(200).json({hasEnough,combined,refillProducts});
             return;
         }
-        await orderDBAPI.assembleOrder(orderID);
+        await orderDBAPI.assembleOrder(orderID,assemblerName);
         res.status(200).json({hasEnough});
     }catch(err){
         console.log(err);
@@ -43,4 +55,4 @@ async function assembleOrder(req,res,next){
     }
 }
 
-module.exports={getAllPendingOrders,assembleOrder};
+module.exports={getAllPendingOrders,assembleOrder,getOrderItems};

@@ -21,7 +21,8 @@ async function getOrder(orderID){
 async function getOrderItems(orderID){
     var sql=`SELECT OI.ORDER_ID,I.TYPE,OI.QUANTITY,I.ITEM_ID,I.TITLE
     FROM ORDER_ITEM OI JOIN ITEM I on OI.ITEM_ID = I.ITEM_ID
-    WHERE OI.ORDER_ID=:orderID`;
+    JOIN "ORDER" O ON OI.ORDER_ID= O.ORDER_ID
+    WHERE OI.ORDER_ID=:orderID AND ORDER_STATUS='PAY_CONFIRMED'`;
     var result=await database.simpleExecute(sql,{orderID});
     return result.rows;
 }
@@ -94,7 +95,7 @@ async function checkEnoughStock(orderID){
 //This is done with autocommit off, so either all of them gets executed in database, or none of them does;
 // In this way, it is ensured either the order is assembled with all the stocks decreased, or none at all.
 //no middle ground
-async function assembleOrder(orderID){
+async function assembleOrder(orderID,assemblerName){
     
     var orderItems=await getOrderItems(orderID);
     var connection=await database.getConnection();
@@ -126,7 +127,8 @@ async function assembleOrder(orderID){
                 }
             }
         }
-        await connection.execute(`UPDATE "ORDER" SET ORDER_STATUS='ASSEMBLED' WHERE ORDER_ID=:orderID`,{orderID});
+        await connection.execute(`UPDATE "ORDER" SET ORDER_STATUS='ASSEMBLED',
+        ASSEMBLER_NAME=:assemblerName WHERE ORDER_ID=:orderID`,{assemblerName,orderID});
         await connection.commit();
     }catch(err){
         console.log(err);
@@ -138,4 +140,4 @@ async function assembleOrder(orderID){
 }
 
 
-module.exports={getAllPendingOrders,getOrder,checkEnoughStock,assembleOrder};
+module.exports={getAllPendingOrders,getOrder,checkEnoughStock,assembleOrder,getOrderItems};

@@ -164,7 +164,7 @@ async function placeOrder(orderItems,destinationAddress,orderDate,destinationSub
     ORDER_DATE, ORDER_STATUS, DESTINATION_SUB_DISTRICT, CLIENT_NAME,DELIVERY_COST)
     VALUES(:price,:destinationAddress,:orderDate,:orderStatus,:destinationSubDistrict,:clientName,:deliveryCharge)`,
     binds);
-    console.log('here');
+    // console.log('here');
     var lastRowID=result.lastRowid;
     var orderID=(await database.simpleExecute(`SELECT ORDER_ID FROM "ORDER" WHERE ROWID=:lastRowID`,{lastRowID})).rows[0].ORDER_ID;
     for(let i=0;i<orderPrices.length;i++){
@@ -183,10 +183,32 @@ async function confirmPayment(orderID,paymentDate){
     await database.simpleExecute(sql,{orderStatus,paymentDate,orderID});
 }
 
+async function deleteCart(clientName){
+    await database.simpleExecute(`DELETE FROM CLIENT_CART WHERE CLIENT_NAME=:clientName`,{clientName});
+}
+
 
 async function cancelOrder(orderID){
     await database.simpleExecute(`DELETE FROM "ORDER" WHERE ORDER_ID=:orderID`,{orderID});
 }
 
+async function getRewardPoints(clientName){
+    var result=await database.simpleExecute(`SELECT REWARD_POINTS FROM CLIENT WHERE USER_NAME=:clientName`
+    ,{clientName});
+    return result.rows[0].REWARD_POINTS;
+}
+async function redeemOrderPrice(orderID,decreasedPrice){
+    await database.simpleExecute(`UPDATE "ORDER"
+    SET TOTAL_PRICE=:decreasedPrice,HAS_REDEEMED=1
+    WHERE ORDER_ID=:orderID`,{decreasedPrice,orderID});
+}
+async function spendRewardPoints(clientName,rewardPoints){
+    console.log("inside spend reward points: "+rewardPoints);
+    await database.simpleExecute(`UPDATE CLIENT
+    SET CLIENT.REWARD_POINTS=(CLIENT.REWARD_POINTS-:rewardPoints)
+    WHERE USER_NAME=:clientName`,{rewardPoints,clientName});
+}
+
 module.exports = { checkEnoughStock, checkOfferExpired,placeOrder,
-calculateTotalPrice,confirmPayment,getOrders,getOrder,cancelOrder,getOrderItems};
+calculateTotalPrice,confirmPayment,getOrders,getOrder,cancelOrder,getOrderItems,deleteCart,
+getRewardPoints,spendRewardPoints,redeemOrderPrice};

@@ -10,5 +10,6 @@ router.post('/assembleOrder',orderController.assembleOrder);
 
 router.post('/addStockRequest',stockRequestController.addStockRequest);
 router.get('/getStockRequest',stockRequestController.getStockRequest);
+router.get('/getOrderItems',orderController.getOrderItems);
 
 module.exports=router;

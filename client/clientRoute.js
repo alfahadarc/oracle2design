@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const {query,body,check,validationResult}=require('express-validator');
-const validationHandler=require('../middleware/validationHandler');
-const productController=require('./product/productController');
-const categoryController=require('./category/categoryController');
-const componentController=require('./component/componentController');
+const { query, body, check, validationResult } = require("express-validator");
+const validationHandler = require("../middleware/validationHandler");
+const productController = require("./product/productController");
+const categoryController = require("./category/categoryController");
+const componentController = require("./component/componentController");
 const { authorize } = require("../middleware/authJWT");
 const role=require('../middleware/role');
 const cartController=require('./cart/cartController');
@@ -18,6 +18,8 @@ const wishlistController=require('./wishlist/wishlistController');
 const notificationController=require('./notification/notificationController');
 const orderController=require('./order/orderController');
 const locationController=require('./location/locationController');
+const achievementController=require('./achievement/achievementController');
+const profileController=require('./profile/profileController');
 
 router.get('/getCategoryProducts',
 query('categoryID').exists().isInt(),
@@ -92,6 +94,7 @@ router.get('/getAllNotifications',authorize([role.Client]),notificationControlle
 router.get('/getUnseenNotificationCount',authorize([role.Client]),notificationController.getUnseenNotificationCount);
 router.delete('/deleteNotification',authorize([role.Client]),notificationController.deleteNotification);
 router.put('/setNotificationAsSeen',authorize([role.Client]),notificationController.setNotificationAsSeen);
+router.get('/getProductIDFromNotification',authorize([role.Client]),notificationController.getProductIDFromNotification);
 
 
 
@@ -106,13 +109,26 @@ router.get('/getOrderItems',authorize([role.Client]),orderController.getOrderIte
 router.get('/getDistricts',locationController.getAllDistricts);
 router.get('/getSubDistricts',locationController.getAllSubdistricts);
 
+
+router.get('/getAchievements',authorize([role.Client]),achievementController.getAllAchievements);
+router.get('/getRewardPoints',authorize([role.Client]),achievementController.getRewardPoints);
+router.put('/claimAchievement',authorize([role.Client]),achievementController.claimAchievement);
+
 router.get('/test',(req,res,next)=>{
     var data=[{NAME:'Nahian',ID:124},{NAME:'Shabab',ID:145}];
     res.status(200).json(data);
 });
 
+router.get(
+  "/getprofile",
+  authorize([role.Client]),
+  profileController.getProfile
+);
 
+router.put(
+  "/updateProfile",
+  authorize([role.Client]),
+  profileController.updateProfile
+);
 
-
-
-module.exports=router;
+module.exports = router;
