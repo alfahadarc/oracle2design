@@ -205,7 +205,7 @@ router.put(
   validationHandler(validationResult, "Featured or Continued Flag is Invalid"),
   body("discount")
     .optional({ nullable: true })
-    .isInt()
+    .isNumeric()
     .custom((value) => {
       if (value > 100 || value < 0) return Promise.reject();
       return true;
